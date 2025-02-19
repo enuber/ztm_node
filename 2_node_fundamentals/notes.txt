@@ -1,0 +1,136 @@
+Latest version of Node
+
+it is a runtime environment that lets developers create servers, web apps, command line tools and scripts.
+
+we will do projects based on node 18 or higher then towards end will update to a newer version to see how that happens and what you need to do.
+
+________________________________________________________________________________________
+
+Installing Node.js
+
+there is LTS and current version. It changes all the time and gets better. Current version may have bugs, the recommeneded version is Long Term Support (LTS) version. It is being maintained and supported. It offers stability. 
+
+You have plenty of ways to install them
+
+Package manager - a program that allows you to install packages like node.js you can have multiple versions of node and switch back and forth between them. 
+
+simplest way is to download the LTS installer on the home page or download page. It will download the installer. Then just follow along with the installer. 
+
+node -v to see version of node 
+
+running node by itself will open runtime with a > you can then run JS in the terminal. To exit command C twice or .exit 
+
+________________________________________________________________________________________
+
+Node release cycle
+
+We always have two versions going Current and LTS.
+
+LTS - gives us more stable versions that will be supported
+
+if you look at the release cycle, Even numbers will be LTS and Odd numbers will always be current versions which will never become LTS. 
+
+From there we get a breakdown of their schedule where there is an active and maintenance phase. Active most changes are accepted and aren't breaking changes. When in maintenance will be just security updates. 
+
+________________________________________________________________________________________
+
+Node.js REPL (read, eval, print, loop)
+
+node - in terminal will bring up the runtime.
+
+We are running it in REPL mode. 
+
+"woo" + "hoo" we would get 'woohoo'
+
+It reads the input, evaluates it, prints it, the loops and starts again. Then it will read the next line and goes through this loop over again.
+
+const cheer = 'woo' + 'hoo'
+
+Read - reads in our code that we typed with the keyboard. It also parses it going through the V8 engine. 
+
+Eval - the parsed code will then be run and evaluated by V8 which will give the result 
+
+Print - will be printed to the console after evaluated.
+
+If we assigned it to a variable, the variable sticks around at least until you exit the REPL and go back in. 
+
+not used for applications as there is no way to save the code, or edit it.
+
+________________________________________________________________________________________
+
+Setting up our dev environment
+
+if you have a js file, you can in the terminal run node <nameoffile>.js
+
+________________________________________________________________________________________
+
+first node applications
+
+doing some basic coding in hello.js
+
+because we are using node, we don't have to write just JS. we can add in more functionality that comes with node itself. 
+
+by typing just node in the terminal we get the REPL
+
+we can then type "process". This will come up with a giant list where we see that there is a bunch of different information about the process which is just Node program that's currently running here. One of the features is the argv property that contains an array that right now just contains the path to our Node executable. 
+
+if you google search node process, you will get documentation that has on the left all the apis/modules that exist. We have the process screen that shows all the informaiton stored in the process. The process object is a global that provides information about and control over the current Node.js process. 
+
+process.argv - the property returns an array containing the command-line arguments passed when the Node.js process was launched. The first element will be the process.execPath. The second element will be the path to the JS file being executed, the remaining elements will be any command line arguments
+
+const { argv } = require('node:process');
+
+// print process.argv
+argv.forEach((val, index) => {
+  console.log(`${index}: ${val}`);
+});
+
+
+node process-args.js one two=three four 
+
+0: /usr/local/bin/node
+1: /Users/mjr/work/node/process-args.js
+2: one
+3: two=three
+4: four 
+
+if you pass in command line arguments but aren't assigning them to anything they are just ignored. 
+
+
+________________________________________________________________________________________
+
+Node.js vs JS
+
+JS is a programming language. If you want to run it, you need to send it through a JS engine. The engine converts those instructions to something that the computer/phone understands. 
+
+Node.js - run JS instructions on your computer outside of the web browser. Node contains alot more than just the V8 engine. But prior to node, JS could only be run in the browser. 
+
+Deno - uses the V8 engine as well. 
+
+going into REPL inside there we see there is no "window" object. Node has "global" instead. like global.process. global.process.argv. We don't have to specifiy they come from global so can just do process.argv. Global has all the functionality that we can use directly. Even the console.log() is global.console.log().
+
+________________________________________________________________________________________
+
+Global object
+
+browser window API's - we deal with html and browsing documents, have window, document, history, location, navigator
+
+global engine - global, process, module, __filename, __dirname, require()
+
+in node docs, we can scroll down to globals to see a full list of global object methods. 
+
+________________________________________________________________________________________
+
+Intro to Backend vs Frontend
+
+We use node to make scripts that do things on our computer like to read and write files. We use it most to create servers, to build web and mobile applications that connect to databases. To provide users with data and things like videos photos and other content. Our server also provides security features like allowing users to log in. 
+
+Client and a server - the front end is the brower or phone, it is what you see on the screen. The backend is what happens behind the scenes. Where we tend to have things like security features, input validation, and most of our business logic. On back end we talk to multiple servers providing services we put together in some meaningful way for our application. 
+
+Lets think about this from the top. If we go to google.com, it will make a request to a server and ask for what belongs on the page. The server will send back a response and give the data to display the page. This can be static files like HTML, CSS and JS. the language the server uses to talk to the client and the language that the client uses to ttalk to the server is called HTTP (hyper text transfer protocol). HTTP is used to transfer the files from server to browser. HTTPS is secure version where it is encrypted to keep the data secure. 
+
+If facebook was being looked at where we have specific accounts for a person, you may get the data back as JSON, XML, or TXT instead. This is what the backend is for, it serves the data that we need on frontend on the client side to show the user. Backend can use any language. You can use Node, python, ruby, java or go. When you write code in those languages, we call that backend code. 
+
+Why don't we just do it all on the front end? On the server we can do things we can't or shouldn't on the browser. Things like security, loggin in our users, and input validation. This idea of client-server architecture is used by most of the web. Building out tha server side is what most node applicaitons are built to do. Our front end is almost always written in HTML, CSS and JS. Node allows developers the huge advantage of allowing programming the backend and frontend in the same language.  
+
+________________________________________________________________________________________

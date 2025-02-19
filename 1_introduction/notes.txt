@@ -1,0 +1,34 @@
+Node JS how we got here
+
+How do you run javascript? you can run it in the browser in the developer tools using the console. In the console though it is the browser that allows us to use javascript as it comes built in. 
+
+We write instructions that go through a JS engine so that our machines do something with the instructions. The JS engine takes what we write and understands it. 
+
+How to write JS outside of a browser. A JS engine is a computer program that executes JS code. The first JS engines were interpreters but modern engines use just-in-time compilation for improved performance. 
+
+What led to node...
+1995 - netscape browser introduced JS. We were able to program onto the web. 
+1996 - netscape livewire, could use server side JS, but it was ahead of it's time and didn't really work well.
+2008 - goolge announced the chrome browser with the V8 engine. Web 2.0 started being talked about. Modern experiences on the web could happen. It allowed JS to run really fast. 
+2009 - Ryan Dahl created Nodejs. Can we take the V8 engine and run it outside of the browser. This is what Node.js solved, it allowed JS to run outside the browser. This allows us to run code on servers. 
+
+___________________________________________________________________________________________
+
+Node.js Runtime
+
+What is a JS runtime. Node is a js runtime. 
+
+It is a JS environment that allows us to run JS and do some extra stuff. It uses V8 engine to run really efficiently. 
+
+
+node.js in a simplified from is a way for us to give a JS file to the node js runtime. It will go to the V8 engine, it will read the JS and if there is something that isn't apart of JS it will communicate to libuv library. 
+
+libuv a multi-platform C library that provides support for async i/o based on event loops. It is written in C++ and, they are bound together so V8 and libuv work together. 
+
+Is a web browser a JS runtime?  a browser contains a JS engine. The engime implements a JS runtime, which includes the call stack, heap and event loop. The browser also usually includes a set of APIs that augment the JS runtime and make async code execution possible. 
+
+window object - has a set of tools that allow us to do things like console.log() or alert() they are not apart of JS but we can still run them in the console window. 
+
+This is similar to node.js however, with node.js we call it global instead. 
+
+How do you run JS? you need to download a set of features so your computer understand what JS is and what to do. Node is a set of tools that allow us to write our applications, the application uses the V8 engine to read the JS. Anytime that there is something requires some sort of thing like worker threads, event queues, event loops. We use the libuv library and these bindings are created for us. 
