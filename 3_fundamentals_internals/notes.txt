@@ -1,0 +1,100 @@
+what node.js includes
+
+What does the runtime include beyond the engine. V8 allows us to run JS. What happens when we do other things that the browser can't.
+
+Inside the runtime...
+v8 engine, node.js APIs (file system, http requests, look up paths, crypto functionality to make programs more secure). When V8 sees some code that uses these features, it calls the corresponding functionality in the API's some of it is written in JS and some in lower level langauges like C or C++. This is where node.js bindings become important as these bindings are what lets your JS code call functionality that's implemented in other langauges. 
+
+The actual functionality of these API's lives in libuv. Libuv and V8 are the two most important internal components of Node. LibUV deals with input and output tasks. It is highly optimized library of code written in C that deal with i/o that node can delegate to other parts of the operating system. 
+
+A download request is input that is asking for output from the web server. the req is from JS using the HTTP module, through the node bindings, node will pass that task onto libUV which will tell the OS the things it needs. The OS will go off and perform those tasks. The JS doesn't wait around for the response. Node tells the OS to let it know when the request is complete and it will get back on it as soon as it can. This is async input/output. It is what Node is best at. 
+
+Nearly all the code we write in node involves some form of async i/o. This includes functionaly from libUV. The way you do things on windows, mac or linux are actually different like opening a file. This is where libUV shines as it abstracts away all of the specific ways of reading a file. Node works on any system, on any platform it does this by implementing the functionality in libUV and exposing it to the node.js bindings which is then translated back to our JS.
+
+________________________________________________________________________________________
+
+Node Internals Deep dive
+
+https://github.com/nodejs/node - the actual code that makes up node. 
+
+two folders that are most interesting are the lib and src folders
+
+lib - is the js side of the our node api's. Each module in our node documentation. 
+
+src - this is the C++ side with low level node.js bindings. It is the connection between JS and C++.  
+
+________________________________________________________________________________________
+
+libuv Internals Deep dive
+
+https://libuv.org/
+
+Node allows us to use libUV becuase of the bindings. Other programming languages use libUV too. 
+
+after looking at the code...
+
+most of the C code is in the src folder. In the src there is a unix and windows folder. 
+
+________________________________________________________________________________________
+
+Synchronous vs Asynchronous
+
+async - doesn't run line by line in sequence. 
+
+sync - means code runs line by line in sequence.
+
+________________________________________________________________________________________
+
+Asynchronous callbacks
+
+Node.js - is an Asynchronous event-driven JS runtime. Designed to build scalable network applications. 
+
+FILE : race.js
+
+________________________________________________________________________________________
+
+non-blocking input & output
+
+ what is non-blocking function - functions that happen in the background or in parallel to rest of code. Settimeout is an example. It is happening in the background while the next line of code gets read. 
+
+ blocking code happens synchronously. ex. JSON.stringify({food: 'love'}); this is a blocking function as stringify happens until it is done. 
+
+ we want to make sure our long running functions are non-blocking allowing node to execute more code. 
+
+ ________________________________________________________________________________________
+
+ Is JS Asynchronous
+
+ out of the box JS is Synchronous, however, we can write async code where we can do a callback in the future. When JS is run in certain environments like browser or node, it allows us to write asynchronous functionality. But the async functionality comes from other apis like the window object or the global object. So JS can behave in an async way but it doesn't come that way outside of the box, you have to manipulate it to be this way. 
+
+ ________________________________________________________________________________________
+
+ Multi-Threading, Processes and Threads
+
+ Way to take advantage of multiple cores in a computer are by using threads. 
+
+ we start from processes - processes are containers containing your code, which lives in the memory of which lives in the memory of the process.
+
+ Code - may be a function that calls a second function and the second function just returns something. Then we have some code that creates a new thread using code from the first function and then another new thread that does the same thing, using code from the the first function. This is pseudocode, it is multi-threaded like java or c++. The idea is to have two threads running the fist function asynchronously. We are passing a function into a new thread twice this is async. 
+
+ What happens in our process is that a new thread is created and it has a call stack. it represents the sequence of operations that live inside the call stack. Which is in turn part of the thread. Like a stack of bricks, new function calls go onto the top of the stack and, functions that are done executing are removed from the top. 
+ 
+  stack -> first new thread function (this calls the first function which in turns calls the second function), second function goes onto the stack, then when the second function returns it's data, it gets removed from the stack, the first function would also be done because it receives the data and, then the first function would be removed from the stack.
+
+  With two threads, we would have the same thing going on but in there own call stacks so we would have two threads with call stacks in them. they would run asynchronously. The two threads don't have to be at the same point, they can be different timing of when they finish. 
+
+  Threads can execute side by side and the CPU can constantly switch back and forth from one thread to another to simulate executing them in parallel. But if we have multiple cores, each core can be dedicated to executing one thread. These two threads are independent of each other. 
+
+  We don't have to worry about this with JS, it is a single - threaded language. 
+
+  ________________________________________________________________________________________
+
+  is Node.js Multi-threaded?
+
+the thing that allowed Node to be so successful is the ability to run JS asynchronously and doing this in such a way that developers could focus on the application rather than complicated multi-threaded logic. JS is single-threaded. If it's not threads that how does node allow us to run code asynchronously? Node JS executes JS code so it has to follow the same way, there is one main thread. This one thread runs the V8 engine, the apis, and libUV. 
+
+However, this isn't the complete picture. libUV handles our async i/o. FS operations and network operations. We can do this asynchronously because of the event loop. There is a thread pool in libuv, it is written in C which has threads, so these are like those in our process explained earlier. There are four default threads waiting beyond the main thread. This is a limited amount of threads. If we run out of threads, we have to wait for something to complete before we can use the thread for something else. Node actively tries to not use threads. Instead where possible node tries to use the OS Kernal instead of using the valuable resources of the thread pool. When the OS finishes what it was doing, the event loop will be notified to run the event loop on any callback. This is what node.js allows async code to run. 
+
+________________________________________________________________________________________
+
+The Event loop
