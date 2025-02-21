@@ -98,3 +98,219 @@ However, this isn't the complete picture. libUV handles our async i/o. FS operat
 ________________________________________________________________________________________
 
 The Event loop
+
+The event loop is a crucial mechanism in Node.js that allows it to handle non-blocking I/O operations efficiently, despite being single-threaded. It enables asynchronous execution, allowing Node.js to handle multiple tasks simultaneously without blocking the main thread.
+
+How the Event Loop Works
+1. Call Stack Execution (Synchronous Code)
+  • When a Node.js program starts, it executes synchronous code line by line in the call stack.
+
+2. Callbacks & Async Tasks Sent to the Event Loop
+  • When an asynchronous operation (like I/O, setTimeout, setImmediate, Promises, or network requests) is encountered, Node.js sends it to the appropriate API or thread pool (if needed) and does not block execution.
+
+3. Event Loop Phases
+The event loop consists of multiple phases, each handling different types of tasks:
+  • Timers Phase → Executes setTimeout() and setInterval() callbacks when their delay time is reached.
+  • Pending Callbacks Phase → Handles I/O callbacks deferred from the previous cycle.
+  • Idle & Prepare Phase → Internal use only.
+  • Poll Phase → Retrieves new I/O events (e.g., file system or network requests) and executes callbacks if available.
+  • Check Phase → Executes setImmediate() callbacks.
+  • Close Callbacks Phase → Handles closed connections (e.g., socket.on('close', callback)).
+
+4. Microtasks (Priority Tasks)
+Microtasks (like process.nextTick() and Promise callbacks) have higher priority than normal tasks and are executed between phases.
+
+console.log("1: Start");
+setTimeout(() => console.log("2: setTimeout"), 0);
+Promise.resolve().then(() => console.log("3: Promise resolved"));
+process.nextTick(() => console.log("4: process.nextTick"));
+console.log("5: End");
+
+1: Start
+5: End
+4: process.nextTick
+3: Promise resolved
+2: setTimeout
+
+Why?
+1 Synchronous code runs first (console.log statements).
+2 process.nextTick() runs immediately after synchronous code.
+3 Promise callback runs next (as a microtask).
+4 setTimeout() runs last in the event loop.
+Key Takeaways
+• Node.js delegates tasks to different APIs instead of blocking execution.
+• Microtasks (process.nextTick and Promises) run before normal event loop tasks.
+• The event loop ensures efficient concurrency, making Node.js great for I/O-heavy applications.
+
+________________________________________________________________________________________
+
+Callback Queues
+
+The callback queue in Node.js is where asynchronous task callbacks wait to be executed when their respective event loop phase is reached. It's a fundamental part of how Node.js manages non-blocking operations efficiently.
+
+How the Callback Queue Works
+When an asynchronous operation (such as I/O, timers, or setImmediate) completes, its callback function is pushed into the appropriate queue. The event loop then picks up these callbacks and executes them when the corresponding phase arrives.
+
+Types of Callback Queues
+Node.js has multiple callback queues, each corresponding to different types of asynchronous operations:
+
+1 Timer Queue (setTimeout, setInterval)
+  • Stores callbacks scheduled by setTimeout() and setInterval().
+  • These callbacks execute in the Timers Phase of the event loop.
+  • Execution occurs only after the specified time delay and when the event loop reaches this phase.
+2 I/O Queue (File System, Network Requests)
+  • Stores callbacks for completed I/O operations (like reading files, database queries, etc.).
+  • These execute in the Poll Phase, which waits for new I/O events and executes ready callbacks.
+3 Check Queue (setImmediate)
+  • Stores callbacks scheduled by setImmediate().
+  • Executes in the Check Phase, immediately after the Poll Phase.
+  •Always executes before timers (if both are scheduled together).
+4 Close Callbacks Queue
+  • Stores callbacks for closed connections (e.g., socket.on('close', callback)).
+  • Runs in the Close Callbacks Phase of the event loop.
+
+Special Priority Queues (Microtask Queue)
+Node.js has higher-priority queues that execute before the callback queue:
+
+1 Next Tick Queue (process.nextTick)
+  • Stores callbacks from process.nextTick().
+  • Always executes right after synchronous code, before the event loop moves to the next phase.
+2 Microtask Queue (Promises & Async/Await)
+  • Stores callbacks from resolved Promises (Promise.then()).
+  • Executes after the current operation but before the event loop moves to the next phase.
+
+console.log("1: Start");
+
+// Timer (setTimeout) → goes to Timer Queue
+setTimeout(() => console.log("2: setTimeout"), 0);
+
+// setImmediate → goes to Check Queue
+setImmediate(() => console.log("3: setImmediate"));
+
+// I/O operation (fs.readFile simulates an async operation)
+const fs = require("fs");
+fs.readFile(__filename, () => console.log("4: File Read (I/O callback)"));
+
+// Promise (Microtask Queue)
+Promise.resolve().then(() => console.log("5: Promise resolved"));
+
+// process.nextTick (Next Tick Queue)
+process.nextTick(() => console.log("6: process.nextTick"));
+
+console.log("7: End");
+
+1: Start
+7: End
+6: process.nextTick
+5: Promise resolved
+4: File Read (I/O callback)
+3: setImmediate
+2: setTimeout
+
+________________________________________________________________________________________
+
+Phases of the Event Loop
+
+The event loop is the core of Node.js’s asynchronous, non-blocking architecture. It continuously executes tasks in a loop, handling various types of operations in distinct phases.
+
+The 6 Phases of the Event Loop
+Each iteration of the event loop (called a tick) consists of six key phases:
+
+1 Timers Phase ⏳
+2 I/O Callbacks Phase 📩
+3 Idle, Prepare Phase (Internal)
+4 Poll Phase 🔄
+5 Check Phase ✅
+6 Close Callbacks Phase 🔐
+
+1. Timers Phase ⏳
+Handles: setTimeout(), setInterval()
+
+What Happens?
+Executes callbacks scheduled by setTimeout() and setInterval(), if their delay has expired.
+If no timers are ready, Node.js moves to the next phase.
+
+2. I/O Callbacks Phase 📩
+Handles: Completed I/O operations (excluding fs, sockets, or timers), Some types of network requests
+
+What Happens?
+Runs callbacks for deferred I/O tasks, like errors from TCP connections.
+This phase is not for general I/O operations like reading files (those are handled in the Poll Phase).
+
+3. Idle, Prepare Phase (Internal)
+Used internally by Node.js.
+Prepares for the Poll Phase.
+Not relevant for application-level code.
+
+4. Poll Phase 🔄
+Handles:  I/O operations (file system, network, database queries), Waiting for new I/O events
+
+What Happens?
+• If there are pending I/O tasks, they are executed here.
+• If the queue is empty, the event loop:
+    • Waits for new events (if necessary).
+    • Moves to the Check Phase if there are no timers left.
+
+5. Check Phase ✅
+Handles: setImmediate() callbacks
+
+What Happens?
+Executes callbacks from setImmediate().
+This phase runs immediately after the Poll Phase.
+
+6. Close Callbacks Phase 🔐
+Handles: Cleanup for closed resources (e.g., socket.on('close', callback)).
+
+What Happens?
+If a socket or stream is closed, its close event callback runs in this phase.
+
+
+Microtask Queue (Runs Between Phases)
+In addition to these six phases, Node.js has high-priority queues:
+
+1. process.nextTick() Queue (Executes after synchronous code but before the next event loop phase)
+2. Microtask Queue (Handles resolved Promises & queueMicrotask())
+🔹 These always execute before the next event loop phase begins.
+
+________________________________________________________________________________________
+
+What is Node.js Best At?
+
+Node is really good at servers. When your main performance problem is input and output rather than calculations. 
+
+________________________________________________________________________________________
+
+Observer Design Pattern
+
+The Observer Pattern is a behavioral design pattern where an object (called the Subject) maintains a list of dependents (Observers) that get notified of any state changes. It follows a one-to-many relationship.
+
+How It Works
+1 Subject (Observable)
+  • Maintains a list of observers (subscribers).
+  • Provides methods to add, remove, and notify observers.
+2 Observers (Subscribers)
+  • Listen for updates from the Subject.
+  • React when notified.
+
+________________________________________________________________________________________
+
+EventEmitter
+
+In Node.js, the EventEmitter is a built-in module that implements the Observer pattern. It allows objects to emit events and listen for them, making it a core part of the event-driven architecture in Node.js.
+
+How EventEmitter Works
+1 Create an EventEmitter instance
+2 Register listeners (subscribers) for events
+3 Emit events to trigger those listeners
+4 Remove listeners when needed
+
+Key Methods in EventEmitter
+Method	                              Description
+.on(event, listener)	      Adds a listener for the specified event.
+.once(event, listener)	    Adds a one-time listener (removes itself after being called).
+.emit(event, ...args) 	    Triggers the event and calls all listeners.
+.off(event, listener)	      Removes a specific listener.
+.removeAllListeners(event)	Removes all listeners for an event.
+.listenerCount(event)	       Returns the number of listeners for an event.
+
+process also includes emitters like process.on('exit', ()=>{})
