@@ -1,0 +1,147 @@
+The require function
+
+we want to reuse code that has been done before and focuse on features that make our application unique.
+
+node allows us to reuse code, we do this using node modules, which we can also use to break down and organize our code into more manageabel files. One of the built-in functions is require() that is not apart of JS. It takes a file, executes it and then returns the code from that file so we can reuse it elsewhere. We can require any default modules. Like HTTP or events. We can do this modules that are third party, built by us or built-in.
+
+________________________________________________________________________________________
+
+Making HTTP requests
+
+FILE: http_example.js 
+
+________________________________________________________________________________________
+
+Why use modules
+
+A module is just like a box, it contains some code dedicated to doing one thing well. We combine these modules together to build complex structures. 
+
+1. Reuse existing code.
+2. Organize our code.
+3. Expose only functionality that will be used.
+
+________________________________________________________________________________________
+
+Creating our own modules
+
+FOLDER/FILE modules_example
+
+setting up just idea of structure in modules_example to show how https may be done. Doesn't really do anything it is more about export/importing modules.
+
+we use module.exports = {filenamekey: filenamevalue}
+
+then in file to import you simply require your files.
+
+________________________________________________________________________________________
+
+Exporting from modules
+
+there are a few ways to export modules. 
+
+you can do
+module.exports.send = function send(url, data) {}
+
+you can also leave the module off in this case. 
+exports.send = function send(url, data) {}
+
+if only exporting one function, can simply set 
+module.exports = function read() {}
+in this case when importing into another moudle to use
+const read = require('./response'); 
+which would allow us to just call read() then to call the function
+
+if given a choice, just do it as we have it as it's clear to others. Can look in one spot instead of references. it would also be better to use destructuring when importing so it makes more sense what you are using in a given file. 
+
+________________________________________________________________________________________
+
+CommonJS vs ECMAScript modules
+
+The modules we've seen have been CommonJS, it is a standard for being used in Node. Though it is used in other technologies. When we use require() it is CommonJS. 
+
+ECMAScript - main standard for the JS language. It is followed by the browser and V8 Engine as much as possible. 
+
+Can use import/export in node now but, it does have some differences. 
+
+Vast majority of code is written with CommonJS
+
+________________________________________________________________________________________
+
+Creating our own ECMAScript modules
+
+would just be rewriting files in modules_example with import/export. Just the way we normally write it in JS. 
+
+doing this, we get an error that says we can't use import statement outside of a module. We also get a warning that we have to set "type": "module" in the package.json file or change file extension to .mjs
+
+It is also now necessary to add the file extension on to the imported files as otherwise it is expecting .js, .json, or .node files
+
+________________________________________________________________________________________
+
+Module Caching
+
+modules are cached after they are loaded for the first time, meaning that subsequent require() calls return the same instance. This improves performance by preventing redundant execution of module code.
+
+How Module Caching Works
+When a module is loaded using require(), Node.js does the following:
+
+1 Loads and executes the module code.
+2 Caches the module in require.cache, using the module's file path as the key.
+3 Subsequent require() calls return the cached version instead of re-executing the module.
+
+________________________________________________________________________________________
+
+importing core modules
+
+FILE http_example.js
+
+when we require('https') you could use require('node:https') 
+
+thse are node built-in modules. what is the difference? We are being more explicit where we want to use the core module. Would come in if we had a third party package with a similar named module, it would be ignored if we used node:https. This works with any of the core packages. 
+
+________________________________________________________________________________________
+
+Using index.js
+
+it is a special case inside of node where it allows you to treat a folder like a module so that when you pass the path to a folder to the require function, it resolves to the index.js file.
+
+because of this, if you had in modules_example a separate folder called internals and you created an index.js file, you could export everything from the other two files like this...
+
+module.exports = {
+  request: require('./request'),
+  response: require('./response')
+}
+
+// to use
+internals.request.send()
+internals.response.read()
+
+you can then point to just the folder instead of all the individual files. 
+
+can import them as well
+const request = require('./request');
+const response = require('./response');
+
+module.exports = {
+  send: request.sent,
+  read: response.read
+}
+
+// to use
+interals.send()
+interals.read()
+
+or can destructure them and just be able to call send() or read()
+
+or even fancier
+
+// takes all the properties/methods in those files and unpacks them so does the same as above with less code
+module.exports = {
+  ...require('./request'), ...require('./response')
+}
+
+________________________________________________________________________________________
+
+should you use index.js or not?
+
+Some love it for its simplification, some think the direct path is better. 
+
+It may add some unexpected confusion so it's good to know but, maybe not the best way to do this. 
