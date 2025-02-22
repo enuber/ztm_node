@@ -1,0 +1,81 @@
+Exploring Planets with Node
+________________________________________________________________________________________
+
+Importing Kepler Space Telescope Data
+
+https://science.nasa.gov/exoplanets/
+
+https://exoplanetarchive.ipac.caltech.edu/docs/data.html
+
+will be using the KOI Table Cumaltive list
+
+downloaded the file to use as data as a .csv file
+
+opening it, it shows the # column name and then an explanation of what the column is
+
+________________________________________________________________________________________
+
+setting up our CSV Parser
+
+use this: const { parse } = require('csv-parse');
+
+we could use the FS file but, it doesn't understand CSV, it is good for txt.
+
+we need a third party module so in npm, can search for csv. we will use csv-parse
+
+npm i csv-parse
+
+________________________________________________________________________________________
+
+Streaming large data files
+
+csv-parse - This package is a parser converting CSV text input into arrays or objects. It implements the Node.js stream API. It also provides alternative APIs for convenience such as the callback API and sync API. 
+
+what is stream API?
+This is the recommended approach if you need a maximum of power. The stream API might not be the most pleasant API to use but it ensures scalability by treating your data as a stream from the source to the destination.
+
+All streams are implemented using the event emitter, where the events are emitted by Node and we just react to the events on that stream using the .on(). 
+
+Our CSV has over 9000 lines. If we had millions of lines of data, in order to be scalable, we need to read in the data line by line. Doing this allows us to handle data as it comes in rather than all the data being read. This allows nodes event loop along with CPU and hard drive to do their jobs as best as possible. 
+
+________________________________________________________________________________________
+
+Reading our planet data
+
+we've seen that the return value from our csv-value module is a function that we can call like so
+
+parse();
+
+this function returns an event emitter that deals with streams of data coming in from the file. But the parse function doesn't deal with files directly it only knows about streams. So we will use FS.
+
+We get an array of buffers. these buffers are just objects that node uses to represent a collection of bytes because our read stream is just reading the raw data in our file as bits and bytes. So we are reading in our file and all of our potential planets but we still need to parse the results and understand the values. 
+
+________________________________________________________________________________________
+
+Parsing our planets data
+
+our data is currently coming in as raw buffer of bytes. We want each part to be parsed as a row of a comma separated file. Like as an object where we get the key as being the column name and the value being the value of that row. This is what csv-parse gives us in the parse()
+
+we can .pipe() on the function where we pass the pipe the results of the createReadStream. It is connecting the two streams together. .pipe() connects a readable stream source to a writeable stream destination. So the kepler file is our source and the parse() is the destination of our pipe.
+
+csv -> read as a stream using createReadStream -> goes to pipe() where it can be connected to another stream a steram that takes in data and processes it -> parse() -> gives us processed rows. 
+
+inside of parse() we pass it an object that has some information on how to deal with the data. We set comment to be the # where lines that start with that character as comments and columns true will return each row as an object with key value pairs rather than as an array of values. 
+
+________________________________________________________________________________________
+
+Finding habitable planets
+
+we need to filter the data. There are many objects that have data we can filter out that have Candidate, or false positive. 
+
+one of the ways to determine if a planet is habitable is based on the stellar flux, which is the measure of the amount of light a planet gets. Or in other words how much energy it gets from it's source of light similar to the sun. it has an upper limite of about 1.11 times the amount of light Earth gets. Any higher than any water would disappear in a short time. and lower values 0.36 times the amount of the sun light as any lower it would be the opposite effect. 
+
+In our table we have three columns insolation flux. 
+
+studies show how large a planet could be before it becomes to large and would be more gas and ice than rocky surfaces. Upper limit is 1.6 times the radius of earth. We can find planetary radius in our list of data too.
+
+________________________________________________________________________________________
+
+Exploring habitable planets
+
+We are now down to 8 planets. 
