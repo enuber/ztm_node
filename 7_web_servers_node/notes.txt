@@ -1,0 +1,228 @@
+what is a web server?
+
+node is almost always used to bring our programs to the web by building the backend. 
+
+when you type something into the browser like facebook, your browser starts by calling a system called DNS (Domain Name System). It uses DNS by talking to DNS servers across the internet. These servers look up the internet address of the server given the name (URL). On the internet, our address is called the IP (internet protocol) and this IP address is what the DNS server sends back to the computer. It is usually a set of four numbers that are separated by periods. It is this address that we use to communicate with the server. It is an HTTP server because we communicate with it using this HTTP/HTTPS protocol. 
+
+We could have servers that use other protocols that handle other info like our emails. The way that we specify which type of server with which application we are talking to is by adding to our IP address the port number, which comes after the colon character.
+
+31.13.80.36:80
+
+The port specifies which application on the server should handle our request. This happens for us as the browser and computer does this for us. It only makes the request to the server the first time we go to a site, afterwards, it is storing the locatoin in the DNS cache, which saves work and performance. 
+
+________________________________________________________________________________________
+
+Introduction to HTTP Responses and Requests
+
+The thing that defines how our web server responds to these request is our API. The Api tells us what kinds of functions the server should support and how those functions should be used. For example getting a list of your friends or getting thier messages or photos. 
+
+We can implement our API on teh server in Node, Python, or any other programming language. What matters is that the language we use when reacting to these requests and responding to them is HTTP, which is the common way that the browser and the server can use to understand waht both sides are saying. 
+
+So the browser is speaking HTTP to the server and the server can respond because it is also speaking HTTP. 
+
+HTTP Request Methods - also called HTTP vers, these are all the actions you could want to perform on the server side as a browser. So a browser may want to GET, POST, PUT, DELETE, PATCH.  There is also HEAD, CONNECT, OPTIONS, TRACE...
+
+________________________________________________________________________________________
+
+HTTP Requests & API Communication
+
+An API (Application Programming Interface) defines how two applications communicate. On the web, the browser makes requests, and the server responds.
+
+Common HTTP Methods
+GET → Retrieve data (e.g., fetch user details)
+POST → Create new data (e.g., add a user)
+PUT → Replace existing data (e.g., update user profile)
+PATCH → Partially update data (e.g., change user email)
+DELETE → Remove data (e.g., delete user)
+
+Request Structure (4 Key Parts)
+Method → The action (GET, POST, etc.) the browser wants to perform.
+Path (Resource URL) → Specifies the collection (/users) or an item (/users/123).
+Body → Data sent to the server (usually JSON).
+Headers → Metadata like authentication, content type, and host information.
+
+Every request must include a Host header to ensure it reaches the correct server.
+
+________________________________________________________________________________________
+
+HTTP Responses
+
+After receiving a request, the server processes it and sends back a response to the client (e.g., a browser or API consumer).
+
+Response Structure (4 Key Parts)
+Status Code → Indicates the result of the request (e.g., 200 OK, 404 Not Found).
+Headers → Metadata like content type, caching rules, and authentication info. (ex: Content-Type)
+Body → The actual data sent back (e.g., HTML, JSON, XML).
+Protocol Version → Specifies the HTTP version used (e.g., HTTP/1.1, HTTP/2).
+
+Common HTTP Status Codes
+
+✅ Success Codes
+200 OK → Request succeeded, data returned
+201 Created → New resource successfully created
+
+Redirection Messages
+300 - Multiple Choice
+301 - Moved Permanetntly (most common in this series)
+
+⚠️ Client Errors
+400 Bad Request → Invalid request from the client
+401 Unauthorized → Authentication required
+403 Forbidden → No permission to access resource
+404 Not Found → Resource doesn’t exist
+
+⛔ Server Errors
+500 Internal Server Error → Generic server failure
+503 Service Unavailable → Server is overloaded or down
+
+example:
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-cache
+
+{
+  "id": 123,
+  "name": "John Doe",
+  "email": "john@example.com"
+}
+
+________________________________________________________________________________________
+
+Our First Webserver
+
+FILE: Index.js
+
+________________________________________________________________________________________
+
+HTTP APIs and Routing
+
+FILE: server.js
+
+currently if we go to localhost:3000 it is always the same data, it doesn't matter if we add in a path like /hello, the same data will appear. 
+
+When we have a server with multiple URLs, we call these endpoints like /friends along with /methods, these are the endpoints that should be giving back different pieces of information. Each endpoint is responsible for a specific piece of functinality that is provided by the backend server. 
+
+________________________________________________________________________________________
+
+Parameterized URLs
+
+File: param.js
+
+So far its functinal but not realistic, when writing real servers we would be sending back data that is coming from some sort of database, where we may have a very large amount of data. In our server, we need to have the ability to query for individual items in our collections. To run queries to be able to run queries and get data that we need to display whatever it is we are displaying. 
+
+To get back info on a single user, we would bass in the id of the user we want to get 
+
+in url...
+/friends/1 
+
+this is what we are referring to by parameterized endpoint/route. 
+
+________________________________________________________________________________________
+
+Same Origin Policy
+
+The Same-Origin Policy (SOP) is a security feature in web browsers that restricts how a webpage can interact with resources (like APIs, scripts, or data) from another domain. It prevents malicious websites from accessing sensitive user data from another site.
+
+What Defines an "Origin"?
+
+An origin consists of three parts:
+1 Protocol (e.g., http:// or https://)
+2 Host (e.g., example.com)
+3 Port (e.g., :3000 for local servers)
+
+For two URLs to have the same origin, all three parts must match.
+
+Example:
+URL                        Same Origin as https://example.com:443?	              Reason
+https://example.com	                    ✅	                            Default HTTPS port is 443
+http://example.com	                    ❌	                        Different protocol (http vs https)
+https://example.com:3000	              ❌	                           Different port (443 vs 3000)
+https://sub.example.com	                ❌                	Different subdomain (example.com vs sub.example.com)
+
+What Does SOP Restrict?
+JavaScript requests
+  • A script from siteA.com cannot fetch data from siteB.com unless explicitly allowed.
+Cookies and Local Storage
+  • A webpage cannot read cookies, local storage, or session storage from another origin.
+DOM Manipulation
+  • A script cannot modify or read the DOM of an iframe from another origin.
+
+How to Bypass SOP (Legally!)
+There are secure ways for websites to share data:
+
+CORS (Cross-Origin Resource Sharing)
+  • A server can send specific HTTP headers (Access-Control-Allow-Origin) to allow requests from other origins.
+Proxies
+  • The server itself can make the cross-origin request and return the response to the client.
+
+Why is SOP Important?
+Prevents malicious sites from stealing your data
+Stops unauthorized access to your private resources
+Protects cookies, local storage, and authentication tokens
+Without SOP, a hacker could build a fake banking site that silently steals your login info from your real bank's website in the background.
+
+________________________________________________________________________________________
+
+Cross Origin Resource Sharing (CORS)
+
+CORS is a security feature that allows a web server to specify which domains are allowed to access resources on that server, relaxing the restrictions imposed by the Same-Origin Policy (SOP). It makes it possible to create web applications that span multiple domains or subdomains, such as fetching resources from different websites or APIs.
+
+Why is CORS Needed?
+Without CORS, a web page could only make requests to the same domain where it was served (due to SOP). However, modern web applications often need to communicate with APIs, services, or assets hosted on different domains (e.g., pulling images or data from external servers). CORS relaxes this limitation, allowing these requests when necessary.
+
+How CORS Works:
+1 Requesting Resources:
+  • When a browser makes a request for a resource from another domain, the server of that resource must include certain headers that allow the browser to approve the cross-origin request.
+2 The Access-Control-Allow-Origin Header:
+  • This header in the response specifies which origins (domains) are allowed to access the resource.
+  • The header can have the following values:
+    • Not included: The default SOP restriction applies. Only requests from the same origin are allowed.
+    • Specific URL: Allows cross-origin requests from a specific domain (e.g., https://example.com).
+    • * (Wildcard): Allows cross-origin requests from any origin. This is often used for public APIs or open resources.
+
+CORS in Production vs Development:
+In Development: It is common to use * (wildcard) to allow access from any origin, especially during testing or when you're working with public data.
+In Production: It is recommended to whitelist specific domains that you trust, limiting access to only those that should interact with your server. This enhances security by ensuring unauthorized sites cannot request resources from your server.
+
+Whitelisting vs Blacklisting:
+Whitelisting is the practice of explicitly allowing access from a known list of trusted domains. For example, you might only allow https://trustedsite.com to access your API.
+
+Blacklisting involves blocking certain domains from accessing resources, but this can be error-prone, as it's easy to miss malicious or unauthorized domains.
+
+Whitelisting is considered safer because it guarantees only known and authorized domains have access, minimizing the risk of unauthorized use.
+
+________________________________________________________________________________________
+
+POSTing data to the server
+
+To submit data to a server we usually use POST or PUT methods. POST adds and PUT updates. Some servers ignore PUT entirely and you have to DELETE and the POST again instead.
+
+PUT - when we want to limit the amount of requests being sent is a good option for updating vs DELETE>POST
+
+FILE posting.js
+
+to test in console, not persisting, process to save to DB would follow same flow. 
+fetch('http://localhost:3000/friends', {
+  method: 'POST', 
+  body: JSON.stringify({ id: 3, name: 'Ryan Dahl'})
+});
+
+________________________________________________________________________________________
+
+Request and Responses as Streams
+
+How do we make an endpoint that echoes back the data to them and the response is the same data. 
+we can pipe it through 
+
+to test in console
+fetch('http://localhost:3000/friends', {
+  method: 'POST', 
+  body: JSON.stringify({ id: 3, name: 'Ryan Dahl'})
+})
+.then(
+  (response)=>{
+    response.json();
+    }
+).then(
+  (friend) => console.log('friend', friend)
+);
