@@ -1,0 +1,103 @@
+Creating our first NPM package
+
+module vs package
+
+module - is a file contains some code that may be exported from the module
+package - like a collection of modules that have been packaged together
+
+npm init or npm init -y // will create a package.json file which holds packages. using -y will be default answers and will skip having to answer questions
+
+with this started, can then install packages to use.
+
+start - special in that we can just say npm start without using "run". Otherwise we have to do npm run test
+
+________________________________________________________________________________________
+
+Do we need package.json?
+
+Latest versions of npm no longer requires package.json to install packages. Just because we can doesn't mean we should. Having a package file is important to be sure we know what package we are using, what version and, can better share the code. 
+
+________________________________________________________________________________________
+
+packages and the NPM registry
+
+your application is a package if you are using a package.json file and npm scripts. Just because it isn't being shared doesn't mean it isn't a package. Of note though, usually when peple refer to packages they are referring to those that they will be installing. It is a reuseable package shared on the registry.
+
+________________________________________________________________________________________
+
+Using 3rd party modules
+
+File request.js also installed package.json and axios
+
+________________________________________________________________________________________
+
+Node Modules Folder
+
+it contains all the modules we have installed and other dependencies that our dependencies need to work as well. It sits in root of folder. We make sure to keep this in the gitignore file, node_modules should not be shared, it is why package.json exists as we just use npm i to grab everything we need.
+
+________________________________________________________________________________________
+
+Semantic versioning
+
+refers to the packages you are downloading though should/could be used for your own versioning
+
+major.minor.patch - versioning ex: 1.0.0. 
+
+major - version when you make incompatiable API changes
+minor - when you add functionality in a backwards compatible manner
+patch - when you make bug fixes. 
+
+________________________________________________________________________________________
+
+package-lock.json and versioning
+
+it is auto generated where the node_modules or package.json file/folder are modified.
+
+it is more specific description of our dependencies, it includes where things are from and that they aren't corrupt. It also does this for all dependencies that are needed for our packages. 
+
+________________________________________________________________________________________
+
+vulnerabilities in dependencies
+
+It's common for security issues to be found in packages. Dealing with keeping your apps secure is acting quickly and updating your packages. Developers have to patch the issues and make the software more resilient. 
+
+when you install packages they often give you warnings about them including security vulternabilities and that they were fixed in a different version. We also get a warning that may say found 1 high severity vulnerability.
+
+npm audit - to see issues
+npm audit fix - will try to fix our issues. 
+
+The fix is generally updating to a newer version, there isn't always a new version so may have to switch to a new library. 
+
+________________________________________________________________________________________
+
+Node Fetch function
+
+fetch - used to make requests and makes it easier. 
+
+can call using either global.fetch() or just fetch()
+
+const response = await global.fetch('https://www.google.com');
+await response.text()
+
+this replaces http module that is built into node and axios. 
+
+________________________________________________________________________________________
+
+Installing NPM Tools: nodemon
+
+benefit of installing locally is that when we share our files, anyone can then get access to what we used to run a project. 
+
+nodemon - tool that helps node applications by auto restarting the node app when file changes in the directory are detected.
+
+npm i nodemon
+
+nodemon is used in package.json as an addition used in scripts to basically watch files for changes and restart rather than having to type node <filename> all the time in the terminal
+
+________________________________________________________________________________________
+
+node buil-in watcher
+
+--watch - this is a built in watcher as of node v18
+
+// instead of using nodemon
+"dev" : "node --watch request.js" 
