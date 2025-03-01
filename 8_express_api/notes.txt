@@ -1,0 +1,150 @@
+Why Express?
+
+If we are doing similar things over and over we build a package or tool. This is where express comes in. 
+
+________________________________________________________________________________________
+
+Intro to Express
+
+FILE: server.js
+
+
+1. npm init -y
+2. npm install express
+3. by calling the file server.js - we automatically get npm start without adding it to our package.
+
+inside the file but...
+this basic setup follows what node does 
+const express = require('express');
+
+// set up the application using the express function that's exported from the express package.
+const app = express();
+
+// set port for our server to be available on.
+const PORT = 3000;
+
+// we call the listen function which is just like in nodes HTTP server.
+app.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}`);
+});
+
+This alone is enough to get the server running though visiting localhost:3000 we will just get a "Cannot GET /" in the window and a 404 not found in console as there is nothing being grabbed for "/"
+
+Express is really good at routing.
+
+req and res act differently than in "node.js" where for example we can do res.send() which allows us to pass data in the response and the server would respond with what is inside of it.
+
+app.get('/', (req, res) => {
+  res.send('Hello')
+});
+
+we can quickly set up routes alot cleaner and easier doing this than we could with Node. With just this little bit, we get the added benefit of the Content-Type being set to text/html and charset=utf-8 without us doing anything else. 
+
+If we change the string to an object {id: 1, name: 'sir albert einstein'} it will automatically change to application/json. 
+
+Express looks through the route handlers we set up and, if it gets a match it runs it, else it will give a 404.
+
+________________________________________________________________________________________
+
+Route Parameters
+
+File server.js (created friends list and friends get routes)
+
+// When sending JSON (like an array of objects), we make sure Express treats it correctly.
+app.get('/friends', (req, res) => {
+  res.json(friends); // Sends the entire `friends` array as JSON.
+});
+
+✅ Key Takeaways:
+  • res.json() automatically sets the correct Content-Type (application/json) in the response headers.
+  • Express automatically stringifies the object before sending it.
+  • It’s good practice to return structured data rather than just plain text.
+
+app.get('/friends/:friendId', (req, res) => {
+  const friendId = Number(req.params.friendId); // Convert the string to a number.
+
+  // Validate values, especially when dealing with user inputs.
+  const friend = friends[friendId];
+
+  if (friend) {
+    res.status(200).json(friend);
+  } else {
+    res.status(404).json({
+      error: 'Friend does not exist',
+    });
+  }
+});
+
+✅ Key Takeaways:
+1. req.params.friendId:
+  • :friendId is a dynamic route parameter that Express extracts from the URL.
+  • Example request: GET /friends/2 → req.params.friendId === "2" (always a string).
+  • We convert it using Number(req.params.friendId) to ensure it's an integer.
+
+2.Validation and Error Handling:
+  • If friendId is out of bounds (undefined in the friends array), we return 404 Not Found.
+  • Always return a meaningful JSON response ({ error: 'Friend does not exist' }) instead of just sending a status code.
+  • If friendId is not a valid number, the lookup might fail—so additional validation is recommended.
+
+app.get('/friends/:friendId', (req, res) => {
+  const friendId = Number(req.params.friendId);
+  // Validate: Ensure it's a number and within bounds.
+  if (isNaN(friendId) || friendId < 0 || friendId >= friends.length) {
+    return res.status(400).json({ error: 'Invalid friend ID' }); // 400 Bad Request
+  }
+  res.status(200).json(friends[friendId]);
+});
+
+✅ Improvements:
+  • Handles non-numeric input (GET /friends/abc → Returns 400 Bad Request instead of crashing).
+  • Prevents negative indices (GET /friends/-1 → Returns 400 Bad Request).  
+  • Ensures friendId exists within the array bounds (prevents undefined access).
+
+
+Instead of route parameters (/friends/:friendId), you can also use query parameters (?id=1):
+
+app.get('/friends', (req, res) => {
+  const friendId = Number(req.query.id); // Extract from `?id=1`
+  
+  if (friendId !== undefined) {
+    if (isNaN(friendId) || friendId < 0 || friendId >= friends.length) {
+      return res.status(400).json({ error: 'Invalid friend ID' });
+    }
+    return res.status(200).json(friends[friendId]);
+  }
+
+  res.json(friends); // If no query parameter, return all friends.
+});
+
+✅ When to Use Query Parameters vs. Route Parameters:
+  • Use Route Parameters (/friends/:friendId) when referring to a specific resource (e.g., retrieving a friend’s details).
+  • Use Query Parameters (/friends?id=1) for optional filtering, searching, or pagination.
+
+________________________________________________________________________________________
+
+Postman and Insomnia
+
+There is a better way of exploring and testing our APIs. Postman is an API testing tool. It allows you to create HTTP requests, organize them into collections and share them. Allows you to send REST, SOAP and GraphQL requests, which are all ways to make requests to the backend. You can set up automated testing, can develop a front end setting up postman to mimic the backend so you are getting back requests like you would if the backend was set up. 
+
+In postman, create a new colleciton and name it
+
+Then with our server running on localhost can do a GET friends request by
+1. creating a new request
+2. name request
+3. in the url bar, type in http://localhost:3000/friends and make sure GET is the method in the dropdown.
+4. Click send and we will see our result on the bottom.
+
+If we were making a post request, you could select the body in the area below the GET | URL bar and, choose what type of data you would like to send, for JSON would use "raw" and from the dropdown choose JSON. 
+
+You can also set the headers, params and authorization
+
+in the data received you can also look at the headers along with other info 
+
+________________________________________________________________________________________
+
+Development Dependencies
+
+we are having to restart our server every time we make a change. So we need to install nodemon so we don't have to do this.
+
+1. npm i nodemon --save-dev
+2. package.json -> 
