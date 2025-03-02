@@ -1,57 +1,42 @@
 const express = require('express');
+const path = require('path');
+
+const friendsRouter = require('./routes/friends.router');
+const messagesRouter = require('./routes/messages.router');
 
 const app = express();
 
+// lets express know we will be using handlebars
+app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, 'views'));
+
 const PORT = 3000;
 
-const friends = [
-  {
-    id: 0,
-    name: 'Sir Isaac Newton',
-  },
-  {
-    id: 1,
-    name: 'Albert Einstein',
-  },
-  {
-    id: 2,
-    name: 'Nikola Tesla',
-  },
-];
+// doesn't get a name, just the function to be called
+app.use((req, res, next) => {
+  const start = Date.now();
+  next();
+  // we can do things here that happen as the flow goes back up (ie when response is coming back out)
+  const delta = Date.now() - start;
+  console.log(`${req.method} ${req.baseUrl}${req.url} ${delta}ms`);
+});
+
+// can also give it a route to show page on
+app.use('/site', express.static(path.join(__dirname, 'public')));
+// app.use(express.static('public'));
+
+// this middleware will handle our JSON. middleware order matters, we want this below the one above because that one is timing things.
+// because this is built into express, we can just call it rather than have to do (req, res, next) though it can take options.
+app.use(express.json());
 
 // we can use app.<method>('route', route handler function which is the callback)
 app.get('/', (req, res) => {
-  res.send('Hello');
+  // we are rendering a handlebars file
+  res.render('index', { title: 'my friends', caption: "let's go skiing!" });
 });
 
-// when we send JSON as we are with having an array of objects, we make sure express treats it like JSON.
-app.get('/friends', (req, res) => {
-  res.json(friends);
-});
-
-// this is how we would get a specific id from the list of friends. friendId could be anything, it is just how we will grab it from the "params"
-app.get('/friends/:friendId', (req, res) => {
-  const friendId = Number(req.params.friendId);
-  // need to validate values especially when not in control of what is there.
-  const friend = friends[friendId];
-  if (friend) {
-    res.status(200).json(friend);
-  } else {
-    // can send just a status code but good practice to send back JSON even if it's an error.
-    // res.sendStatus(404);
-    res.status(404).json({
-      error: 'Friend does not exist',
-    });
-  }
-});
-
-// app.get('/messages', (req, res) => {
-//   res.send('<ul><li>Hello Einstein</li></ul>');
-// });
-
-// app.post('/messages', (req, res) => {
-//   console.log('updating messages');
-// });
+app.use('/friends/', friendsRouter);
+app.use('/messages/', messagesRouter);
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);

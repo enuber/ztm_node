@@ -147,4 +147,363 @@ Development Dependencies
 we are having to restart our server every time we make a change. So we need to install nodemon so we don't have to do this.
 
 1. npm i nodemon --save-dev
-2. package.json -> 
+2. package.json -> "watch" : "nodemon server.js"
+3. in terminal - npm run watch
+________________________________________________________________________________________
+
+Middleware
+
+There is an idea in express that comes up repeatedly
+
+Request ---> Express API ---> response
+
+Middleware allows you to add features to your server by working with the incoming request and the response coming out. Middleware are special functions that run between or in the middle of the request coming in and the response going out.
+
+When our request comes in, it goes through all of the middleware sequentially one by one right up until the response is set and returned back up to the client. 
+
+These functions always look like this...
+// this app.use() registers our middleware with express so it knows to run it. 
+// what is inside the () is the function that we pass in to handle the request and the response. 
+// next is the third parameter and, we have to call it in order for things to continue. 
+app.use(function(req, res, next) {})
+
+next - this is a function that express gives us to allow us to call the next middleware.  
+
+Endpoint - once we have run through the middleware, it will get to the endpoint which is the route that is being requested. 
+
+________________________________________________________________________________________
+
+Writing our own logging middleware
+
+FILE server.js, creating an app.use()
+
+as we are just logging, we used postman to make calls, these are listed under ZTM - Express Exxampel get all friends and get one friend
+
+note that there is time being measured in postman but, this is a longer period of time because it is from when request is sent to when response comes back vs in Express it's from when middleware started to when it ended and response is then sent back out. So slightly longer times.
+
+________________________________________________________________________________________
+
+POST Request in Express
+
+app.post('/friends', (req, res) => {});
+
+On post requests we are going to be looking at the request object and reading data passed in from the client. It is in JSON data and out of the box, our server doesn't understand the data. 
+
+As all of our requests would be JSON, this would get repetitive so it may be a good idea to see if there is a helper for this. Express has express.json([options]) which is a midldeware to parse incoming requests with a JSON payload. It will set the parsed data on req.body.
+
+In postman using post add friend, or... POST http://localhost:3000/friends/ then in the body we chose raw {"name": "Marie Curie"} and made sure dropdown is JSON. then send.
+
+________________________________________________________________________________________
+
+Model View Controller
+
+Software design pattern commonly used for developing user interfaces that divides related program logic into three interconnected elements. 
+
+Model -> Updates -> View -> seen by -> User -> uses -> controller -> manipulates -> Model (back to beginning)
+
+Most Express apps use MVC. 
+
+Controller - react to incoming requests and sets teh response accordingly.
+Model - this is our data could be a DB, this also contains the functions that we use to access the DB.
+View - How the data is presented back to the user. Like graphs/diagrams or HTML. When just making APIs which are handled by a front end, then the view might just be the API and the JSON data that will be sent back through it. 
+
+________________________________________________________________________________________
+
+MVC in Express
+
+controllers
+In our app we've been working on with just friends info, the routes are our controllers. These are the things that interact with actions taht the user takes like making a request. 
+
+we will make a controllers folder and create one controller module for each of our collections of data. So one for friends, one for messages. This allows us to group together related functionality while still breaking things down into small enough modules that are easy to work with. 
+
+FILE > controllers > 
+
+we use named functions because if something goes wrong, node can tell us where that went wrong in the log. So better to use then arrow functions becuase node won't be able to tell us where the problem occurred even if the arrow is assigned to a named variable. 
+
+models
+File > models 
+
+In here we have our simple array of objects as it is the "data". It gets exported and then imported in the friends.controller
+
+
+views
+Right now our views if we have any are the json objects that we send back in our response. For example when we post a friend, the way the user sees that data, if we consider our front end as postman they see it as JSON. We are letting the client be repsonsible for the rest. We don't have any logic for how the data is displayed. 
+
+
+________________________________________________________________________________________
+
+Express Routers
+
+When we are building large express applications we will take advantage of the concept called a router to organize the routes in our appication into smaller groups. 
+
+what is a router? it is like a mini applicaiton. It contains it's own set of middleware and routes. We use a router to break down our application and make it more modular. We create a route by using the express object called express.Router.
+
+const friendsRouter = express.Router();
+
+the way we use routers is like any other middleware in express applications. We need to make sure to use them by calling the app.use() function and passing in the newly created router. 
+
+We also call this mounting the router on the app object. The special thing Routers allow us to do is that we can mount a group of routes under a specific path. If all our friends will be under the /friends path just with different HTTP methods and possibly something afterwards, we can do
+
+app.use('/friends', friendsRouter);
+
+and then remove the /friends from inside our routes. We just need to make sure to call app.use() on the router so that Express knows to match requests to the routes that are contained within that router.
+
+By doing this, our friendsRouter doesn't need to worry about other routes in the application. It is  self-contained. We will usually have a folder called "routes" and then group our routes into these self contained routers. 
+
+inside these routers, we will move all the code from the server.js file and include the controller import as it is these files that need access to the controllers. Then we export the Router and import it into the server and call the app.use().
+
+You can now also apply custom middleware to the router files. 
+
+________________________________________________________________________________________
+
+RESTful APIs
+
+REST - the most common and important pattern when building APIs. 
+
+A RESTful API (Representational State Transfer API) is a set of rules and conventions for building and interacting with web services. It follows REST architecture principles, enabling communication between a client (e.g., web app, mobile app) and a server using HTTP methods.
+
+🔥 Key Characteristics of RESTful APIs
+✅ Stateless – Each request contains all necessary information; the server doesn’t store session state.
+✅ Client-Server Architecture – The frontend (client) and backend (server) are independent.
+✅ Uniform Interface – Uses standard HTTP methods (GET, POST, PUT, DELETE).
+✅ Resource-Based – Data is treated as resources (e.g., /users, /products).
+✅ Uses HTTP Methods – CRUD operations are mapped to HTTP methods.
+✅ JSON or XML – Data is typically exchanged in JSON format for readability.
+
+🏆 Best Practices for RESTful APIs
+🔹 Use proper status codes (200 OK, 201 Created, 404 Not Found, 400 Bad Request, 500 Internal Server Error).
+🔹 Use nouns, not verbs, in endpoints (/users instead of /getUsers).
+🔹 Handle errors properly – Always return meaningful error messages.
+🔹 Follow consistent naming conventions – Use lowercase and dashes (/user-profiles instead of /UserProfiles).
+🔹 Secure your API – Implement authentication (JWT, OAuth) and validation.
+🔹 Use pagination for large datasets – (/users?page=2&limit=10).
+
+🚀 Final Thoughts
+A RESTful API makes it easy to create scalable, modular, and maintainable web services. Express.js provides a simple way to build them using middleware and routing.
+
+1. use existings standards (HTTP, JSON, URL)
+2. Endpoints are collectiosn of data
+3. use GET, POST, PUT, DELETE 
+4. Client and Server - client displays data to user and allows them to perform actions which are sent to the server which goes off and updates the data as necessary and sends it back to the client.
+5. stateless and cacheable - stateless each request is separate and not connected to any state on the client that's not included in the request. So server isn't keeping track of which requests the reuser has made. Only keep track of data in the collections. They are independent. 
+
+________________________________________________________________________________________
+
+CRUD
+
+Create (POST), Read (GET), Update (PUT-replaces/PATCH-modifies/rare), DELETE (Delete)
+
+// this link gives a list of each method along with corresponding status codes based on actions
+https://restapitutorial.com/introduction/httpmethods
+
+________________________________________________________________________________________
+
+Sending files
+
+We've thus far been sending Raw data back. Sometimes we need to send files back. Express lets us do that.
+
+res.sendFile(path.join(__dirname, '..', 'public', 'skimountain.jpg'));
+
+This line sends the skimountain.jpg file to the client. Let's break it down further:
+
+✅ Using res.sendFile()
+res.sendFile(filePath) is an Express method that sends a file as a response.
+It sets the correct Content-Type header automatically (e.g., image/jpeg for .jpg files).
+It ensures the file is streamed efficiently.
+
+✅ Using path.join()
+path.join(__dirname, '..', 'public', 'skimountain.jpg')
+
+• path.join() constructs a file path in a way that works across different operating systems (Windows, macOS, Linux).
+• __dirname represents the current directory of the executing script. __dirname is a global variable in Node.js that represents the absolute path of the directory containing the currently executing script.
+• '..' moves one level up (out of the current directory).
+• 'public' is the folder that contains the file.
+• 'skimountain.jpg' is the file name.
+
+🔹 When to Use Each?
+✅ Use res.sendFile() for serving static files (images, PDFs, downloads).
+✅ Use res.send() for sending dynamic content (HTML, text responses).
+
+________________________________________________________________________________________
+
+Serving websites with node
+
+Express provides a built-in middleware called express.static() to serve static files such as HTML, CSS, JavaScript, and images.
+
+// Serve static files from the "public" directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+Now, any files inside the /public folder are accessible through http://localhost:3000.
+
+For example:
+
+/public/index.html → http://localhost:3000/index.html
+/public/css/style.css → http://localhost:3000/css/style.css
+
+
+Serving Static Files from a Route
+You can also mount a static folder to a specific route.
+
+app.use('/site', express.static(path.join(__dirname, 'public')));
+
+🔹 Now files are available at:
+  • /public/index.html → http://localhost:3000/site/index.html
+  • /public/js/script.js → http://localhost:3000/site/js/script.js
+This isn't truly RESTful, but it's useful for simple static sites.
+
+CDN vs. Express for Static Files
+Instead of serving static files with Express, CDNs (Content Delivery Networks) like Cloudflare, Akamai, or AWS CloudFront are faster and more scalable.
+
+🔹 CDN Advantages:
+✅ Lower Latency – Files are served from the closest edge server
+✅ Reduced Server Load – Express focuses on API logic, not static files
+✅ Better Caching – CDNs efficiently cache assets for quick delivery
+
+🔥 Best practice:
+1️⃣ Use a CDN for production (index.html, images, CSS, JS).
+2️⃣ Let Express handle only dynamic content & API requests.
+
+🚀 Serving React, Vue, or Angular with Express
+When building an SPA (Single Page Application), you typically:
+
+Run npm run build in React, Vue, or Angular
+Serve the /dist or /build folder with Express
+Example:
+app.use(express.static(path.join(__dirname, 'build')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+✅ This ensures React, Vue, or Angular routes work properly.
+
+________________________________________________________________________________________
+
+Templating Engines
+
+A templating engine allows you to generate dynamic HTML by embedding JavaScript logic inside your views. Instead of sending raw strings from Express, you can use templates to create structured pages with variables, loops, and conditionals.
+
+1. Popular Templating Engines for Express
+Engine   file extension       features
+EJS	          .ejs	        Simple, supports JavaScript logic
+Handlebars    .hobbies      Logic-less, good for templates with helpers
+
+2. Setting Up a Templating Engine in Express
+Express supports various templating engines using app.set().
+
+🔹 Install a Template Engine
+First, install the engine of your choice.
+
+npm install ejs --save
+
+npm install express-handlebars --save
+
+3. Configure Express to Use a Templating Engine
+🔹 Using EJS (Embedded JavaScript)
+
+In server.js:
+const express = require('express');
+const app = express();
+
+// Set EJS as the templating engine
+app.set('view engine', 'ejs');
+
+// Serve static files
+app.use(express.static('public'));
+
+// Define a route that renders a view
+app.get('/', (req, res) => {
+  res.render('index', { title: 'Home Page', message: 'Welcome to Express!' });
+});
+
+app.listen(3000, () => console.log('Server running on port 3000'));
+
+📌 Views Folder: Create an index.ejs file inside the views directory:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title><%= title %></title>
+</head>
+<body>
+    <h1><%= message %></h1>
+</body>
+</html>
+
+✅ Now, visiting http://localhost:3000 will render the EJS template.
+
+
+Install and configure Handlebars:
+
+const express = require('express');
+const { engine } = require('express-handlebars');
+
+const app = express();
+
+// Set Handlebars as the view engine
+app.engine('hbs', engine({ extname: '.hbs' }));
+app.set('view engine', 'hbs');
+
+app.get('/', (req, res) => {
+  res.render('index', { title: 'Home Page', message: 'Welcome to Handlebars!' });
+});
+
+app.listen(3000, () => console.log('Server running on port 3000'));
+
+📌 Views Folder (views/index.hbs):
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{title}}</title>
+</head>
+<body>
+    <h1>{{message}}</h1>
+</body>
+</html>
+
+4. Passing Data to Templates
+With any templating engine, you can pass data using res.render():
+
+app.get('/profile', (req, res) => {
+  res.render('profile', {
+    name: 'Erik',
+    age: 30,
+    hobbies: ['Coding', 'Gaming', 'Music']
+  });
+});
+
+📌 EJS Example (profile.ejs):
+<h1>Welcome, <%= name %></h1>
+<p>Age: <%= age %></p>
+
+<h2>Hobbies:</h2>
+<ul>
+  <% hobbies.forEach(hobby => { %>
+    <li><%= hobby %></li>
+  <% }) %>
+</ul>
+
+5. Layouts & Partials (Code Reuse)
+Most templating engines support layouts (shared HTML structure) and partials (reusable components like headers & footers).
+
+🔹 Using EJS Partials
+📌 Create a views/partials/header.ejs:
+<header>
+  <h1>My Website</h1>
+</header>
+
+📌 Include it in a template (index.ejs):
+<%- include('partials/header') %>
+<h2>Welcome to my site!</h2>
+✅ This keeps your templates DRY (Don’t Repeat Yourself).
+
+6. When to Use a Templating Engine?
+✅ When building server-side rendered (SSR) web apps
+✅ When needing dynamic content inside HTML
+✅ When you don’t want to use a full frontend framework (React, Vue, etc.)
+
+________________________________________________________________________________________
+
+Layouts and Separation of Concerns
+
+With handlebars if you create a file called layout.hbs it acts as a template for what is common across all pages. 
+
+When we call res.render() it will call layout.hbs by default and, the template we specificy "index", only needs to include the body that we want to appear. So we still pass in the object with what we want replaced but, the index file will be much more simplified. 
