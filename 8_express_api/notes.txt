@@ -177,7 +177,7 @@ Writing our own logging middleware
 
 FILE server.js, creating an app.use()
 
-as we are just logging, we used postman to make calls, these are listed under ZTM - Express Exxampel get all friends and get one friend
+as we are just logging, we used postman to make calls, these are listed under ZTM - Express Example get all friends and get one friend
 
 note that there is time being measured in postman but, this is a longer period of time because it is from when request is sent to when response comes back vs in Express it's from when middleware started to when it ended and response is then sent back out. So slightly longer times.
 
@@ -203,7 +203,7 @@ Model -> Updates -> View -> seen by -> User -> uses -> controller -> manipulates
 
 Most Express apps use MVC. 
 
-Controller - react to incoming requests and sets teh response accordingly.
+Controller - react to incoming requests and sets the response accordingly.
 Model - this is our data could be a DB, this also contains the functions that we use to access the DB.
 View - How the data is presented back to the user. Like graphs/diagrams or HTML. When just making APIs which are handled by a front end, then the view might just be the API and the JSON data that will be sent back through it. 
 
@@ -212,13 +212,13 @@ ________________________________________________________________________________
 MVC in Express
 
 controllers
-In our app we've been working on with just friends info, the routes are our controllers. These are the things that interact with actions taht the user takes like making a request. 
+In our app we've been working on with just friends info, the routes are our controllers. These are the things that interact with actions that the user takes like making a request. 
 
 we will make a controllers folder and create one controller module for each of our collections of data. So one for friends, one for messages. This allows us to group together related functionality while still breaking things down into small enough modules that are easy to work with. 
 
 FILE > controllers > 
 
-we use named functions because if something goes wrong, node can tell us where that went wrong in the log. So better to use then arrow functions becuase node won't be able to tell us where the problem occurred even if the arrow is assigned to a named variable. 
+we use named functions because if something goes wrong, node can tell us where that went wrong in the log. So better to use then arrow functions because node won't be able to tell us where the problem occurred even if the arrow is assigned to a named variable. 
 
 models
 File > models 
@@ -227,16 +227,16 @@ In here we have our simple array of objects as it is the "data". It gets exporte
 
 
 views
-Right now our views if we have any are the json objects that we send back in our response. For example when we post a friend, the way the user sees that data, if we consider our front end as postman they see it as JSON. We are letting the client be repsonsible for the rest. We don't have any logic for how the data is displayed. 
+Right now our views if we have any are the json objects that we send back in our response. For example when we post a friend, the way the user sees that data, if we consider our front end as postman they see it as JSON. We are letting the client be responsible for the rest. We don't have any logic for how the data is displayed. 
 
 
 ________________________________________________________________________________________
 
 Express Routers
 
-When we are building large express applications we will take advantage of the concept called a router to organize the routes in our appication into smaller groups. 
+When we are building large express applications we will take advantage of the concept called a router to organize the routes in our application into smaller groups. 
 
-what is a router? it is like a mini applicaiton. It contains it's own set of middleware and routes. We use a router to break down our application and make it more modular. We create a route by using the express object called express.Router.
+what is a router? it is like a mini application. It contains it's own set of middleware and routes. We use a router to break down our application and make it more modular. We create a route by using the express object called express.Router.
 
 const friendsRouter = express.Router();
 
@@ -248,7 +248,7 @@ app.use('/friends', friendsRouter);
 
 and then remove the /friends from inside our routes. We just need to make sure to call app.use() on the router so that Express knows to match requests to the routes that are contained within that router.
 
-By doing this, our friendsRouter doesn't need to worry about other routes in the application. It is  self-contained. We will usually have a folder called "routes" and then group our routes into these self contained routers. 
+By doing this, our friendsRouter doesn't need to worry about other routes in the application. It is self-contained. We will usually have a folder called "routes" and then group our routes into these self contained routers. 
 
 inside these routers, we will move all the code from the server.js file and include the controller import as it is these files that need access to the controllers. Then we export the Router and import it into the server and call the app.use().
 
@@ -282,7 +282,7 @@ A RESTful API (Representational State Transfer API) is a set of rules and conven
 A RESTful API makes it easy to create scalable, modular, and maintainable web services. Express.js provides a simple way to build them using middleware and routing.
 
 1. use existings standards (HTTP, JSON, URL)
-2. Endpoints are collectiosn of data
+2. Endpoints are collections of data
 3. use GET, POST, PUT, DELETE 
 4. Client and Server - client displays data to user and allows them to perform actions which are sent to the server which goes off and updates the data as necessary and sends it back to the client.
 5. stateless and cacheable - stateless each request is separate and not connected to any state on the client that's not included in the request. So server isn't keeping track of which requests the reuser has made. Only keep track of data in the collections. They are independent. 
@@ -506,4 +506,4 @@ Layouts and Separation of Concerns
 
 With handlebars if you create a file called layout.hbs it acts as a template for what is common across all pages. 
 
-When we call res.render() it will call layout.hbs by default and, the template we specificy "index", only needs to include the body that we want to appear. So we still pass in the object with what we want replaced but, the index file will be much more simplified. 
+When we call res.render() it will call layout.hbs by default and, the template we specify "index", only needs to include the body that we want to appear. So we still pass in the object with what we want replaced but, the index file will be much more simplified. 

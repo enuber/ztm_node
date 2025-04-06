@@ -95,7 +95,7 @@ nodemon is used in package.json as an addition used in scripts to basically watc
 
 ________________________________________________________________________________________
 
-node buil-in watcher
+node built-in watcher
 
 --watch - this is a built in watcher as of node v18
 

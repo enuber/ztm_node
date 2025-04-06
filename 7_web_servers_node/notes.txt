@@ -8,19 +8,19 @@ We could have servers that use other protocols that handle other info like our e
 
 31.13.80.36:80
 
-The port specifies which application on the server should handle our request. This happens for us as the browser and computer does this for us. It only makes the request to the server the first time we go to a site, afterwards, it is storing the locatoin in the DNS cache, which saves work and performance. 
+The port specifies which application on the server should handle our request. This happens for us as the browser and computer does this for us. It only makes the request to the server the first time we go to a site, afterwards, it is storing the location in the DNS cache, which saves work and performance. 
 
 ________________________________________________________________________________________
 
 Introduction to HTTP Responses and Requests
 
-The thing that defines how our web server responds to these request is our API. The Api tells us what kinds of functions the server should support and how those functions should be used. For example getting a list of your friends or getting thier messages or photos. 
+The thing that defines how our web server responds to these request is our API. The API tells us what kinds of functions the server should support and how those functions should be used. For example getting a list of your friends or getting their messages or photos. 
 
-We can implement our API on teh server in Node, Python, or any other programming language. What matters is that the language we use when reacting to these requests and responding to them is HTTP, which is the common way that the browser and the server can use to understand waht both sides are saying. 
+We can implement our API on the server in Node, Python, or any other programming language. What matters is that the language we use when reacting to these requests and responding to them is HTTP, which is the common way that the browser and the server can use to understand waht both sides are saying. 
 
 So the browser is speaking HTTP to the server and the server can respond because it is also speaking HTTP. 
 
-HTTP Request Methods - also called HTTP vers, these are all the actions you could want to perform on the server side as a browser. So a browser may want to GET, POST, PUT, DELETE, PATCH.  There is also HEAD, CONNECT, OPTIONS, TRACE...
+HTTP Request Methods - also called HTTP verbs, these are all the actions you could want to perform on the server side as a browser. So a browser may want to GET, POST, PUT, DELETE, PATCH.  There is also HEAD, CONNECT, OPTIONS, TRACE...
 
 ________________________________________________________________________________________
 
@@ -100,7 +100,7 @@ FILE: server.js
 
 currently if we go to localhost:3000 it is always the same data, it doesn't matter if we add in a path like /hello, the same data will appear. 
 
-When we have a server with multiple URLs, we call these endpoints like /friends along with /methods, these are the endpoints that should be giving back different pieces of information. Each endpoint is responsible for a specific piece of functinality that is provided by the backend server. 
+When we have a server with multiple URLs, we call these endpoints like /friends along with /methods, these are the endpoints that should be giving back different pieces of information. Each endpoint is responsible for a specific piece of functionality that is provided by the backend server. 
 
 ________________________________________________________________________________________
 
@@ -108,9 +108,9 @@ Parameterized URLs
 
 File: param.js
 
-So far its functinal but not realistic, when writing real servers we would be sending back data that is coming from some sort of database, where we may have a very large amount of data. In our server, we need to have the ability to query for individual items in our collections. To run queries to be able to run queries and get data that we need to display whatever it is we are displaying. 
+So far its functinoal but not realistic, when writing real servers we would be sending back data that is coming from some sort of database, where we may have a very large amount of data. In our server, we need to have the ability to query for individual items in our collections. To run queries to be able to run queries and get data that we need to display whatever it is we are displaying. 
 
-To get back info on a single user, we would bass in the id of the user we want to get 
+To get back info on a single user, we would pass in the id of the user we want to get 
 
 in url...
 /friends/1 

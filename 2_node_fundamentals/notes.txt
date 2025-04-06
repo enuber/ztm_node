@@ -74,7 +74,7 @@ by typing just node in the terminal we get the REPL
 
 we can then type "process". This will come up with a giant list where we see that there is a bunch of different information about the process which is just Node program that's currently running here. One of the features is the argv property that contains an array that right now just contains the path to our Node executable. 
 
-if you google search node process, you will get documentation that has on the left all the apis/modules that exist. We have the process screen that shows all the informaiton stored in the process. The process object is a global that provides information about and control over the current Node.js process. 
+if you google search node process, you will get documentation that has on the left all the apis/modules that exist. We have the process screen that shows all the information stored in the process. The process object is a global that provides information about and control over the current Node.js process. 
 
 process.argv - the property returns an array containing the command-line arguments passed when the Node.js process was launched. The first element will be the process.execPath. The second element will be the path to the JS file being executed, the remaining elements will be any command line arguments
 
@@ -107,7 +107,7 @@ Node.js - run JS instructions on your computer outside of the web browser. Node 
 
 Deno - uses the V8 engine as well. 
 
-going into REPL inside there we see there is no "window" object. Node has "global" instead. like global.process. global.process.argv. We don't have to specifiy they come from global so can just do process.argv. Global has all the functionality that we can use directly. Even the console.log() is global.console.log().
+going into REPL inside there we see there is no "window" object. Node has "global" instead. like global.process. global.process.argv. We don't have to specify they come from global so can just do process.argv. Global has all the functionality that we can use directly. Even the console.log() is global.console.log().
 
 ________________________________________________________________________________________
 

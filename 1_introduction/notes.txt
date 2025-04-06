@@ -21,7 +21,7 @@ What is a JS runtime. Node is a js runtime.
 It is a JS environment that allows us to run JS and do some extra stuff. It uses V8 engine to run really efficiently. 
 
 
-node.js in a simplified from is a way for us to give a JS file to the node js runtime. It will go to the V8 engine, it will read the JS and if there is something that isn't apart of JS it will communicate to libuv library. 
+node.js in a simplified form is a way for us to give a JS file to the node js runtime. It will go to the V8 engine, it will read the JS and if there is something that isn't apart of JS it will communicate to libuv library. 
 
 libuv a multi-platform C library that provides support for async i/o based on event loops. It is written in C++ and, they are bound together so V8 and libuv work together. 
 

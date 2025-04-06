@@ -1,0 +1,228 @@
+Nasa Project
+
+to run go into the server folder and do 
+npm start
+
+then in client folder do
+npm start
+________________________________________________________________________________________
+
+Intro and Archtecture
+
+way to set up or diagram out your project.
+lucid.app/lucidchart/
+
+other programs to do this include glyphy, MS visio, or PS, sketch
+
+in our folder structure, we will need models which is our data and routes which handle our routes. We are using MVC but, we don't need a controllers folder. For larger applications it tends to be good to keep related code together and only separate code that deals with different functionality. For our structure it means that our controllers are going to live alongside our routes, because the controllers defines how we respond to that specific route. So the code that deals with handling our API endpoints and the code for our controllers will be side by side under this routes folder. 
+
+For views, we will be having a separate client (front-end) where our client is going to be a dedicated front-end project and we're going to be sending data which it will be in full control of displaying however it chooses. So we don't need a views folder.
+
+for large programs with seperate front/back ends it is common that we create multiple node packages for 
+those different parts of our application that all live inside of our main project folder. So we will have a package.json at the root and, one in each of the client/server folders.
+
+________________________________________________________________________________________
+
+NASA Dashboard front end setup
+
+We are using code provided for us in a downloadable zip folder, just copy pasted into the client folder and then in terminal went into the folder and ran "npm install". Needed to run "npm audit fix" as well. 
+
+________________________________________________________________________________________
+
+NASA Dashboard functionality
+
+With front end already set up, we need to understand what the back end needs to accomplish. Going through the pages, there is an upcoming section that lists out missions to come and, a history section that shows previous missions. Along with this, on the launch page there is a dropdown that appears to need a destination
+
+________________________________________________________________________________________
+
+React.js Front End walkthrough
+
+using react-scripts to help with running our scripts npm run start, npm run build...
+
+rest of video was just walking through a react project and does point out that the hooks > request.js file shows what kind of requests need to be made
+
+________________________________________________________________________________________
+
+API Server setup
+
+go into server folder in terminal and do "npm init -y" to get the package.json. 
+
+npm i express
+npm i --save-dev nodemon 
+
+will follow same structure as client, so created a src folder and moved server.js and models/routes folders into it. This means in the package.json file have to update adding in src/ before server.js
+
+Then start adding express into server.js
+
+NEW: inside of "start" : "PORT=5000 ndoe src/server.js"
+
+can set the port here and it will fill in as process.env.PORT inside of the server.js. Means you can work around not having an actual process.env file. Though that is still the better way to do it. 
+
+________________________________________________________________________________________
+
+EXPLANATION of what happened last video in server.js and app.js files 
+
+app.js file:
+1. Importing Express:
+const express = require('express');
+Here, you're importing the express module, which is a popular web framework for Node.js. Express simplifies routing and handling HTTP requests.
+
+2. Creating the Express Application:
+const app = express();
+express() is a function that initializes an Express application. This app object will hold all the middleware, routes, and configurations related to your web application.
+
+3. Using Middleware to Handle JSON Requests:
+app.use(express.json());
+app.use() is a method that mounts middleware to the Express app. Here, express.json() is a middleware function that allows your app to automatically parse incoming JSON payloads from requests (e.g., when you send JSON data in a POST request). This is useful for handling APIs that deal with JSON data.
+
+4. Exporting the Express App:
+module.exports = app;
+Finally, you're exporting the app object so that it can be used in other files (in this case, server.js). By separating the server logic and the app logic, you're making the code more modular and easier to manage.
+
+server.js file:
+1. Importing HTTP and the Express Application:
+const http = require('http');
+const app = require('./app');
+You're importing the native http module from Node.js, which is used to create an HTTP server. You also import the app object from the app.js file, which contains all the Express functionality.
+
+2. Setting the Port:
+const PORT = process.env.PORT || 8000;
+This line sets the port on which the server will listen. It first checks if there's a PORT environment variable set (for example, in production), and if not, it defaults to 8000.
+
+3. Creating an HTTP Server Using http.createServer:
+const server = http.createServer(app);
+This is where you integrate Express with the HTTP server. By passing the app (Express application) into http.createServer(), you're telling Node to use your Express application to handle incoming HTTP requests.
+
+http.createServer() is a lower-level Node.js function that creates an HTTP server instance. It needs to be provided with a request handler. By passing app into this function, you're essentially saying that for every incoming request, it should be handled by the Express application (which is the app object).
+
+Normally, when using Express, you can use app.listen() to set up a server. But in this case, you're manually creating the server and passing the Express app to it.
+
+4. Starting the Server and Listening for Requests:
+server.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}...`);
+});
+The server.listen() method starts the server and listens for incoming requests on the specified PORT. When the server is up and running, it logs a message saying it's listening on the defined port.
+
+Why use http.createServer with Express?
+1. Separation of Concerns:
+
+By separating the Express application setup (app.js) and the HTTP server logic (server.js), you're following a modular structure that is easier to maintain and extend. This separation allows you to organize your code better and isolate concerns like routing and middleware (in app.js) from server configuration and handling (in server.js).
+
+2. Flexibility with Custom Servers:
+
+Using http.createServer gives you the flexibility to customize how the server handles incoming requests. For example, you could add additional listeners for different types of requests, integrate with other libraries, or apply advanced server configurations that aren't easily achievable with just app.listen().
+
+3. Integration with Other Server-Side Features:
+
+If you want to integrate additional functionality, like WebSockets or server-sent events (SSE), you can easily do that with http.createServer. By creating a custom server, you can use the same app instance from Express while also using other Node.js functionalities that might not be directly available with the default Express setup.
+
+Recap:
+Express (app.js): Handles routing, middleware, and web application logic.
+
+HTTP server (server.js): Uses the http module to create and manage the server, which is passed the Express app to handle HTTP requests.
+
+The separation allows for greater flexibility, better modularization of code, and the possibility of extending server-side functionality beyond what Express itself offers.
+
+________________________________________________________________________________________
+
+GET / planets
+
+Following what we learned in 8_express_api, we will do the same type of the thing, set up a planets.router.js, planets.controller.js and planets.model.js file. The code structure is pretty much the same thing. 
+
+once this is set up, we went back into the client > src > hooks >requests.js and set up httpGetPlanets()
+
+At this point it was ready to test. Mind you that the array was empty and, the point of it was we get a CORS error because one is on localhost:3000 and other is localhost:8000
+
+________________________________________________________________________________________
+
+CORS middleware
+
+How to fix an origin error.
+
+Cross Origin requests are those that are made from a domain on one origin to a different origin, where an origin is the combination of the sites protocol, host and port (ex https://www.goodle.com:443/maps/). As a security feature browsers block cross origin requests so you don't leak data unintentionally. We can allow it by sending Access-Control-Allow-Origin: https://www.google.com header from the server, which will allow either all (*) or from a specific origin if we specify it's value. This is whitelisting. 
+
+When using Express, it is as easy as adding some middleware before our routes. 
+
+if we search the npm registry for CORS we will find packages that do so. Next install in terminal the package. In the server folder...
+
+npm install cors
+
+once installed we can put it into our middleware chain in app.js
+you can set it up for multiple origins
+const whitelist = ['http://example1.com', 'http://example2.com'];
+
+var corsOptions = {
+  origin: function(origin, callback) {
+    if (whitelist.indexof(origin) !=== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
+}
+
+app.use(cors(corsOptions));
+
+now if you start the client and server you will see it works and can check the network tab > planets to see the call and response 
+
+________________________________________________________________________________________
+
+Models vs Controllers vs Routers
+
+Why is Models separate from Controllers/Routers when it was mentioned code that is for similar thing should be kept together which is why we have Controllers/Routers in same folder.
+
+The reason is that we keep the two together because they are one to one. There is always a controller for a router. For our models, there may be many models being used by one controller or it's possible that one of the models is used in multiple controllers. We separate our data from our endpoints because they don't necessarily match one to one. 
+
+________________________________________________________________________________________
+
+Planets Model
+
+Going to adapt the code we used in 6_file_input_output_planets_project
+
+Once we have installed csv-parse and, exported the module, we will run into an issue where the data isn't being gathered as expected. There is an issue with they asynchronous code dealing with the planets. 
+
+We are using streams and node won't wait for any of our stream code to complete before it returns our 
+module.exports. 
+
+________________________________________________________________________________________
+
+Loading Data on Startup
+
+Our planet data is loaded and parsed as a stream. It happens asynchronously but, node doesn't wait around for it, it exports the planets before the stream is finished which means we aren't sending the data we expect to send. 
+
+We can instead create a JS promise for our loading code. And wait for the promise to resolve before accepting any incoming requests in our controller. 
+
+const promise = new promise(resolve, reject) => {resolve(42)};
+promise.then((result => {}));
+await result = await promise;
+console.log(result);
+
+We are doing this type of promise logic in the planets.models.js file in order to make sure the data is loaded before moving forward. Once promised is wrapped, we export the function and bring that into server.js. Then we need to create an async function that can await for the data. 
+
+Also, need to create the path to the correct file as we put the data inside a data folder.
+
+NOTE: starting with node 15 there is a sterams promises API. So this may be a better way of doing this. 
+
+________________________________________________________________________________________
+
+Automating Full StackApps with npm
+
+currently we have to run our program by starting both client and server packages going into each and starting them. So now we will update to do both.
+
+inside project and not inside either folder we will do...
+
+npm init -y 
+
+won't have any modules or dependencies
+
+
+    "install-server": "npm install --prefix server",
+    "install-client": "npm install --prefix client",
+    "install": "npm run install-server && npm run install-client",
+    "server": "npm run watch --prefix server",
+    "client": "npm start --prefix client",
+    "watch": "npm run server & npm run client",
+
+Note the differences using && and just & 
+&& - waits until first one is done then does second one
+& - runs both at same time

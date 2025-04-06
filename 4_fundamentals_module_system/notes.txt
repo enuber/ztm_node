@@ -1,8 +1,8 @@
 The require function
 
-we want to reuse code that has been done before and focuse on features that make our application unique.
+we want to reuse code that has been done before and focus on features that make our application unique.
 
-node allows us to reuse code, we do this using node modules, which we can also use to break down and organize our code into more manageabel files. One of the built-in functions is require() that is not apart of JS. It takes a file, executes it and then returns the code from that file so we can reuse it elsewhere. We can require any default modules. Like HTTP or events. We can do this modules that are third party, built by us or built-in.
+node allows us to reuse code, we do this using node modules, which we can also use to break down and organize our code into more manageable files. One of the built-in functions is require() that is not apart of JS. It takes a file, executes it and then returns the code from that file so we can reuse it elsewhere. We can require any default modules. Like HTTP or events. We can do this modules that are third party, built by us or built-in.
 
 ________________________________________________________________________________________
 
@@ -95,7 +95,7 @@ FILE http_example.js
 
 when we require('https') you could use require('node:https') 
 
-thse are node built-in modules. what is the difference? We are being more explicit where we want to use the core module. Would come in if we had a third party package with a similar named module, it would be ignored if we used node:https. This works with any of the core packages. 
+these are node built-in modules. what is the difference? We are being more explicit where we want to use the core module. Would come in if we had a third party package with a similar named module, it would be ignored if we used node:https. This works with any of the core packages. 
 
 ________________________________________________________________________________________
 

@@ -58,7 +58,7 @@ our data is currently coming in as raw buffer of bytes. We want each part to be 
 
 we can .pipe() on the function where we pass the pipe the results of the createReadStream. It is connecting the two streams together. .pipe() connects a readable stream source to a writeable stream destination. So the kepler file is our source and the parse() is the destination of our pipe.
 
-csv -> read as a stream using createReadStream -> goes to pipe() where it can be connected to another stream a steram that takes in data and processes it -> parse() -> gives us processed rows. 
+csv -> read as a stream using createReadStream -> goes to pipe() where it can be connected to another stream a stream that takes in data and processes it -> parse() -> gives us processed rows. 
 
 inside of parse() we pass it an object that has some information on how to deal with the data. We set comment to be the # where lines that start with that character as comments and columns true will return each row as an object with key value pairs rather than as an array of values. 
 
@@ -68,7 +68,7 @@ Finding habitable planets
 
 we need to filter the data. There are many objects that have data we can filter out that have Candidate, or false positive. 
 
-one of the ways to determine if a planet is habitable is based on the stellar flux, which is the measure of the amount of light a planet gets. Or in other words how much energy it gets from it's source of light similar to the sun. it has an upper limite of about 1.11 times the amount of light Earth gets. Any higher than any water would disappear in a short time. and lower values 0.36 times the amount of the sun light as any lower it would be the opposite effect. 
+one of the ways to determine if a planet is habitable is based on the stellar flux, which is the measure of the amount of light a planet gets. Or in other words how much energy it gets from it's source of light similar to the sun. it has an upper limit of about 1.11 times the amount of light Earth gets. Any higher than any water would disappear in a short time. and lower values 0.36 times the amount of the sun light as any lower it would be the opposite effect. 
 
 In our table we have three columns insolation flux. 
 
@@ -79,3 +79,68 @@ ________________________________________________________________________________
 Exploring habitable planets
 
 We are now down to 8 planets. 
+
+
+________________________________________________________________________________________
+
+Explanation of index.js
+
+This code is performing the following tasks:
+
+Imports Necessary Modules:
+
+csv-parse: A module that allows parsing CSV data.
+
+fs (File System): A module to interact with the file system to read files.
+
+Defines an Array:
+
+habitablePlanets: An empty array where confirmed habitable planets will be stored.
+
+Defines a Helper Function (isHabitablePlanet):
+
+This function checks if a planet satisfies the conditions to be considered a "habitable planet" by:
+
+koi_disposition === 'CONFIRMED': Ensures the planet is confirmed (not just a candidate).
+
+koi_insol: This value represents the planet’s "insolation" or how much sunlight it gets. A habitable planet needs to have insolation between 0.36 and 1.11 times that of Earth.
+
+koi_prad: This value represents the planet’s size. A habitable planet needs to be smaller than 1.6 times the size of Earth.
+
+If all these conditions are true, the function returns true, indicating that the planet is habitable.
+
+Reads and Parses the CSV File:
+
+fs.createReadStream('kepler_data.csv'): Opens and reads the file kepler_data.csv from the file system.
+
+.pipe(parse({ comment: '#', columns: true })): The CSV data is passed through the csv-parse module to parse the file. It will ignore lines starting with # (comments) and use the first row as the column names (columns: true).
+
+As the CSV data is read:
+
+.on('data', (data) => {...}): For each row in the CSV file, the data (each planet’s data) is passed to this function.
+
+isHabitablePlanet(data): The data is checked using the isHabitablePlanet function. If the planet satisfies the conditions, it is pushed into the habitablePlanets array.
+
+.on('error', (err) => {...}): If any error occurs while reading or parsing the file, it is logged to the console.
+
+.on('end', () => {...}): Once the file is fully read and parsed, the end event is triggered.
+
+console.log(habitablePlanets.map((planet) => planet['kepler_name'])): Logs the names of all confirmed habitable planets from the habitablePlanets array.
+
+console.log(habitablePlanets.length): Logs the total number of habitable planets that were found and added to the array.
+
+Summary:
+The code reads a CSV file (kepler_data.csv) containing data about exoplanets.
+
+It checks if each planet meets specific criteria to be considered "habitable" (confirmed, right amount of sunlight, and the right size).
+
+If a planet meets those criteria, it is added to the habitablePlanets array.
+
+At the end, it prints out the names of all habitable planets and the total number found.
+
+
+
+
+
+
+
