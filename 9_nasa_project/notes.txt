@@ -1,5 +1,15 @@
 Nasa Project
 
+Current way, just change into the project main folder. Just look at package.json
+
+npm run deploy
+
+second old way
+
+npm run watch
+
+below is old way
+
 to run go into the server folder and do 
 npm start
 
@@ -226,3 +236,278 @@ won't have any modules or dependencies
 Note the differences using && and just & 
 && - waits until first one is done then does second one
 & - runs both at same time
+
+Don't forget about gitignore files.
+
+________________________________________________________________________________________
+
+Serving React.js Front End in production
+
+How do we run this in production?
+
+When we want to run our project in production we often want to run them in one server. Ideally we want to have the ability to serve our front end from the same server as our API. This way we don't have to manage two separate servers at different URLs. The way we do this is in our client, if we are using React, we first build our project, including framework, source code and any assets we are using into a single build folder that is optimized for production.  
+
+Withour client here, we look into package.json we have a build script. when it gets run, it creates a new folder called build with everything in it. Most frameworks do this and end up in a dist or build folder.
+
+We don't want this build folder to be in our client folder so we can set it up to move it by going into the package.json within the client folder. We do this...
+
+"build": "BUILD_PATH=../server/public react-scripts build",
+
+Now when we run build on the client, it will put all the files directly into the server > public folder. This works because we are using react-scripts and it needs to be at least ^4.0.2. If this doesn't work you can simply copy the build folder files into the public folder.
+
+Now inside of our app.js in the server, we can just serve up this code. 
+
+Now, when we are at our project root, we can run 
+
+npm run server
+
+and go to localhost:8000 to see our project.
+
+in this case we have one more issue, when we go to just localhost:8000/ the page isn't working and we have to click on launch or one of the other nav elements to load something to fix this, we go into app.js and add 
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+});
+
+which tells our server what to do at the base URL.
+
+________________________________________________________________________________________
+
+UPDATE OF ABOVE MATERIALS with VITE
+
+Configuring Vite to Output the Build Folder to the Server:
+
+In a typical React with Vite setup, you would not need the complexity of manually moving the build folder, as Vite already generates the files in the dist folder by default.
+
+However, to serve the build files directly from the server's public folder, you can modify the Vite config. This can be done by setting the build.outDir option in the vite.config.js file.
+
+// vite.config.js
+export default {
+  build: {
+    outDir: '../server/public', // This will make the build files go directly to the server's public folder
+  },
+};
+
+This way, you don't need to manually copy the build files — Vite will automatically place them in the correct location when you run vite build.
+
+Serving the Build Files in the Server:
+
+If you are using Express in your server (or any other backend framework), you can serve the static files from the public folder where Vite puts the build output.
+
+Here's how you'd set up the server to serve the front-end files after building with Vite:
+
+const express = require('express');
+const path = require('path');
+const app = express();
+
+// Serve static files from the build folder (where Vite placed them)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Catch-all route for React's client-side routing (single-page app)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+The app.get('*', ...) route will handle any paths that are managed by your React app (for example, when you navigate between different routes in your app).
+
+This ensures that all React routes, including those that the user might navigate directly to, will load the correct index.html file, which is essential for single-page apps (SPA).
+
+________________________________________________________________________________________
+
+Logging requests with Morgan
+
+We want to see what the requests are. We could write our own middleware using req.method and req.url that express has built in. But we can use existing middleware.
+
+Morgan - middleware that allows us to log out info to different streams. 
+
+Morgan does a lot of useful things for us. It also allows us to define what data we want the logs to include, like the current date or the HTTP method of the request. Like the date or HTTP method of the request. We can also specify how to format the data that is logged. It also supports some predefined formats which meets our needs nicely. Most common is combined which corresponds to the log format used by the apache web server. it is more complete than anything we would write ourselves. 
+
+// inside of the server folder 
+npm i morgan 
+
+as for where it should go in the middleware chain, it needs to go somewhere higher up. Should be as high as we can go before any cecurity related middleware that controls what comes in and out. 
+
+This allows you to see what is going on, on your page. When we do "npm run deploy" it will show both front in and back end requests. 
+
+________________________________________________________________________________________
+
+Launches Model
+
+Need to think about the collections we need and what models those collections require. 
+
+Based on page build we will have ability
+Launch Date - date object
+Missions Name - string
+Rocket Type - string
+Destination Exoplanet - a planet based on a dropdown.
+
+When we launch the mission, we will then need to keep track in both upcoming and history
+
+The difference here is that history will also have something called customers and the upcoming will have desitnation but, each will contain a number, date, mission and rocket.
+
+customers - funded by people could be one or more people
+
+so now putting in pseudo code into the launches model. 
+
+const launch = {
+  flightNumber: 100,
+  mission: 'Kepler Exploration X',
+  rocket: 'Explorer IS1',
+  launchDate: new Date('December 27, 2030'),
+  destination: 'Kepler-442-b',
+  customers: ['NASA', 'NOAA'],
+  upcoming: true, // becomes false when it is historical
+  success: true, // to track whether a mission happpened or not future-proofing to track if it happened or not
+};
+
+instead of tracking via an array we will use a map which allows us to map any value to any other value. They preserver the order in which you insert them. 
+
+const launches = new Map();
+
+launches.set(launch.flightNumber, launch)
+
+we will use the flightNumber as the identifier.
+
+launches.get(100); // will return our launch object
+
+________________________________________________________________________________________
+
+GET /launches
+
+Our frontend will access launches in the upcoming and history pages. The routes we will build for the launches correspond one to one with the launches model. We won't access planets model in the launches model. 
+
+We will follow along with what was done with planets where we set up the routes in app.js and, then create them in launches.router.js and finally build out the controller.
+
+In the controller we want to return JSON that corresponds to the launches map from the model. However the map objects that we have aren't JSON. What we want to return from the getAllLaunches endpoint is the list of values on our launches map. All of these launch objects that we set using our set function and we can get these values by calling the values functioin on the map object. 
+
+So launches.values() gives us an iterable iterator of values in the map where we could for example use a for of statement...
+
+  for (const value of launches.values()) {
+  }
+
+this would allow us to loop over all of the values in our launches map. 
+
+it isn't what we want though. We need to first convert it into a plain old JS object or an array which is also valid JSON. For this we can use Array.from(launches.values()). This gives an array containing all of the values. 
+
+So our model uses a Map to better handle the data allowing us to index into our launches by flightNumber, and our controller is able to manipulate that data into a format that works for our API into JSON that we can return to the frontend. 
+
+We will then go to postman and set up a ZTM - NASA and from there choose add request. We will create a GET launches request to test and see our data is coming back in JSON format. We also added this in for the planets endpoint.
+
+Back in our code, we can now add this into the front end and, to do so we go back to the hooks>requests.js file. This will be for httpGetLaunches() which also requests they be sorted by flight number which we add in on the front end, and could do on the backend as well to make sure. 
+
+________________________________________________________________________________________
+
+Serving appications with client side routing
+
+at this point when we go to localhost:8000/history we get a cannot GET /history
+
+our production build where we server our API and api fromthe same server, gives us this error. 
+
+currently we are serving all our assets from the public folder. 
+
+// serve all of our public files using the path.join function.
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+this is so that in our server we can have both the frontend and the API both availble on the same port through Express. Issue is our server is handling the routing for our API endpoints, but not the routing in our client. In our client, if you look under src>applayout you see we have our routes for the frontend being handled by react. React router is also responsible for deciding what to do with that path, that URL, that we put into the browser. This is all happening in the index.html file that is being served from the public folder that contains the running react application. 
+
+if we look through the React deployment doc, there is a serving apps with client side routing section. Ultimately the trick for this to work is to add /* into the app.js file of our server code. This is a wildcard, so will match any endpoint, it will first look through our routers because those come first and if they don't match any of the express routers, it will be passed on to the index.html file which will then take care of it. This means the frontend will handle the routing. (NOTE the above did not work had to revise to below)
+
+Why {*any} works:
+Wildcard Matching: {*any} is often used in routing systems to catch all incoming requests that haven't been explicitly handled by other routes, including both API routes and client-side routes.
+
+Custom Routing Logic: This allows for flexible route management, where the fallback can be dynamically determined based on any unmatched path, making it easier to handle user-defined paths.
+
+________________________________________________________________________________________
+
+Working with Data Models: building a data access layer
+
+What goes in the model or the controller?
+
+ideally we don't want the controllers to be worrying about how the data in the model from our MVC pattern is stored, whether that is in a database, sowmewhere in the cloud or in memory. Our controllers should be working with our request and the response and our models can give us the data access functions which control how the data in the model can be written to and read. 
+
+In our current code, we have 
+
+function getAllLaunches(req, res) {
+  return res.status(200).json(Array.from(launches.values()));
+}
+
+in the controller, it would be better to abstract this Array.from(...) logic into the model. What that means is that the controller only needs to know that we're using the launches odel, and from that model, we're getting all launches, which is a data access function that we will export from the model. 
+
+So we are refactoring in launch.controller and, by doing so we also renamed the function with http... which now means that when we use this name method, it is something that we will get a response from. 
+
+by doing this there is now a clearer divison of responsibilies between the model and the controller. Our model handles the data and how it is accessed, and the controller only ever uses the data access functions to work with the data model and then puts it altogether in a response that is useful for our frontend.
+
+We redid the planets model/controller too.
+
+Our data access functions are apart of what is called a layered Architecture where our application consist of multiple layers which talk to each other. We can separate our code into these layers either as standalone or in addition to the MVC pattern. This is also considered Separation of Concerns. This also means it's easier to maintain, grow and update. So as the project gets larger it follows a pattern that keeps this manageable. 
+
+________________________________________________________________________________________
+
+POST /launches creating Launches 1
+
+Now going to add in functionality for when we launch a mission, this is to "POST" the mission. 
+
+1. Server source code - could start at the router, move to controller and finally the mdoel.
+2. Start with model and move down to controllers to router. 
+
+see notes in the launches.model. 
+
+In addition - 
+
+If we look at our current hard coded launch we can see what data we expect from the inputs on the launch page and, those that we need to handle. Flight number we are dealing with. But there are also the customer, upcoming and success fields. 
+
+Once the Model is done, we will go to postman and test a POST request. 
+
+________________________________________________________________________________________
+
+POST /launches creating Launches 2
+
+At this point we have the set up in postman but, that is all, haven't tested it. So set up the request for what it looks like. Need to now set up the controller to handle the data and pass it to the model. 
+
+Launch Date -
+Remember our launches model has a launch date for our mission. Ideally we'd store it in a JS date object (new Date(date info here)). There are advanced date librarires like "moment" from npm that allow you to add/subtract dates and work with time zones. What we do have to deal with right now is JSON as being passed into our API doesn't allow you to pass date objects. Instead we have to pass in a string and convert it into a date in our API. 
+
+With this done, we finished off the controller function for adding a new launch. Inside of the router, we will now set up the POST request and, while doing this, go into app.js and set up a path for launchesRouter so that we can just use '/' instead of '/lauches'.
+
+By doing app.use('/launches', launchesRouter); 
+
+we are lettting express to only react to requests under the /launches path. Which means inside of the launch.router, we don't need to include the /launches in our routes. It just means when we use '/' inside the router file that it matches the troot of the path where it has been mounted which is at '/launches'
+
+Now that we have this all setup back to postman where we can now test and, it is successful. However, we are still considered fragile as our date for example could be an actual string of random text and would give us "null" in the data. 
+
+________________________________________________________________________________________
+
+POST /launches Validation for POST requests
+
+There are libraries that deal with validation. Instead here we will try to lay a foundation for validation. 
+
+Added some basic error handling to the controller function
+
+________________________________________________________________________________________
+
+Connecting POST /launches with front end Dashboard
+
+here we are adding this to our hooks in the client side. 
+
+________________________________________________________________________________________
+
+DELETE /launches Aborting a launch 1
+
+Doing this update in reverse starting with hook in client code and moving from there. Then route, controller, model. 
+
+________________________________________________________________________________________
+
+DELETE /launches Aborting a launch 2
+
+we aren't going to actually delete, instead we are going to update the upcoming and success flags to false. This in the error of big data, will still keep it around but, will mark it as aborted. This also means that it will show up in historical page on the frontend.
+
+we created an existsLaunchWithID which may not necessarily have been needed as we could do so in the abortLauchById but, it can be a useful tool that may be needed multiple times so kept it separate. 
+
+________________________________________________________________________________________
+
+Updating our Architecture Diagram
